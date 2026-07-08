@@ -52,7 +52,7 @@ public class StatsRepositoryTest {
         assertEquals(1, result.size());
         assertEquals("app1", result.getFirst().getApp());
         assertEquals("/test", result.getFirst().getUri());
-        assertEquals(2L, result.getFirst().getHits());
+        assertEquals(2, result.getFirst().getHits());
     }
 
     @Test

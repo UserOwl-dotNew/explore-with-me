@@ -8,7 +8,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ViewStats {
-    public String app;
-    public String uri;
-    public Long hits;
+    private String app;
+
+    private String uri;
+
+    private Long hits;
 }
