@@ -1,4 +1,4 @@
-package ru.practicum.statistics.dto;
+package ru.practicum.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.NotBlank;
@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class EndpointHitDto {
+public class EndpointHit {
     @NotBlank(message = "Название сервиса не должно быть пустым")
     private String app;
 
