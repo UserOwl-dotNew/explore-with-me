@@ -3,6 +3,7 @@ package ru.practicum.statistics.server.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.dto.EndpointHit;
 import ru.practicum.dto.ViewStats;
@@ -33,6 +34,7 @@ public class StatsController {
     }
 
     @PostMapping("/hit")
+    @ResponseStatus(HttpStatus.CREATED)
     public void post(@RequestBody EndpointHit endpointHit) {
         log.info("POST /hit REQUEST: endpointHit= {}", endpointHit);
         HitEntity hit = service.save(endpointHit);

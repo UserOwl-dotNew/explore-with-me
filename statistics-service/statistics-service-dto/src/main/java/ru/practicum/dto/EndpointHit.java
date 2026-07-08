@@ -1,9 +1,11 @@
 package ru.practicum.dto;
 
+import lombok.Data;
+
 import java.time.LocalDateTime;
 
+@Data
 public class EndpointHit {
-    public Long id;
     public String app;
     public String uri;
     public String ip;
