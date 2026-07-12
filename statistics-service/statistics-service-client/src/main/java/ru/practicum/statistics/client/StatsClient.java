@@ -6,8 +6,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-import ru.practicum.statistics.dto.EndpointHitDto;
-import ru.practicum.statistics.dto.ViewStatsDto;
+import ru.practicum.dto.EndpointHit;
+import ru.practicum.dto.ViewStats;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -23,7 +23,7 @@ public class StatsClient {
     @Value("${stats-server.url:http://localhost:9090}")
     private String serverUrl;
 
-    public void sendHit(EndpointHitDto hit) {
+    public void sendHit(EndpointHit hit) {
         try {
             restTemplate.postForEntity(serverUrl + "/hit", hit, Void.class);
             log.info("Отправлен хит: {}", hit);
@@ -32,7 +32,7 @@ public class StatsClient {
         }
     }
 
-    public List<ViewStatsDto> getStats(String start, String end, List<String> uris, Boolean unique) {
+    public List<ViewStats> getStats(String start, String end, List<String> uris, Boolean unique) {
         try {
             UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(serverUrl + "/stats")
                     .queryParam("start", start)
@@ -44,7 +44,7 @@ public class StatsClient {
                 builder.queryParam("unique", unique);
             }
 
-            ViewStatsDto[] response = restTemplate.getForObject(builder.toUriString(), ViewStatsDto[].class);
+            ViewStats[] response = restTemplate.getForObject(builder.toUriString(), ViewStats[].class);
             return Arrays.asList(response);
         } catch (Exception e) {
             log.error("Ошибка при получении статистики: {}", e.getMessage());
