@@ -19,11 +19,12 @@ import java.util.List;
 @Slf4j
 public class StatsController {
 
+    private static final String DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
     private final StatsService service;
 
     @GetMapping("/stats")
-    public Collection<ViewStats> getAll(@RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime start,
-                                        @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime end,
+    public Collection<ViewStats> getAll(@RequestParam @DateTimeFormat(pattern = DATE_TIME_FORMAT) LocalDateTime start,
+                                        @RequestParam @DateTimeFormat(pattern = DATE_TIME_FORMAT) LocalDateTime end,
                                         @RequestParam(required = false) List<String> uris,
                                         @RequestParam(defaultValue = "false") boolean unique) {
         log.info("GET /stats REQUEST: start= {} end= {} uris_count= {} unique= {}",
