@@ -1,0 +1,183 @@
+package ru.practicum.mainservice.events.repository;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
+import ru.practicum.common.entity.Category;
+import ru.practicum.common.entity.Location;
+import ru.practicum.common.entity.User;
+import ru.practicum.common.enums.EventState;
+import ru.practicum.mainservice.categories.repository.CategoryRepository;
+import ru.practicum.mainservice.events.entity.Event;
+import ru.practicum.mainservice.users.repository.UserRepository;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+@DataJpaTest
+@ActiveProfiles("test")
+@EntityScan(basePackages = {"ru.practicum.common.entity", "ru.practicum.mainservice.events.entity"})
+@TestPropertySource(properties = {
+        "spring.jpa.database-platform=org.hibernate.dialect.H2Dialect",
+        "spring.datasource.url=jdbc:h2:mem:testdb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=false"
+})
+public class EventRepositoryTest {
+
+    @Autowired
+    private EventRepository eventRepository;
+
+    @Autowired
+    private CategoryRepository categoryRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    private Category category;
+    private User initiator;
+    private Event event1;
+    private Event event2;
+    private LocalDateTime now;
+
+    @BeforeEach
+    void setUp() {
+        now = LocalDateTime.now();
+
+        category = new Category();
+        category.setName("Концерты");
+        category = categoryRepository.save(category);
+
+        initiator = new User();
+        initiator.setName("Иван Петров");
+        initiator.setEmail("ivan@mail.ru");
+        initiator = userRepository.save(initiator);
+
+        Location location = new Location();
+        location.setLat(55.754167f);
+        location.setLon(37.62f);
+
+        event1 = new Event();
+        event1.setAnnotation("Тестовое событие 1");
+        event1.setDescription("Описание события 1");
+        event1.setTitle("Событие 1");
+        event1.setCategory(category);
+        event1.setInitiator(initiator);
+        event1.setLocation(location);
+        event1.setEventDate(now.plusDays(5));
+        event1.setCreatedOn(now);
+        event1.setState(EventState.PENDING);
+        event1.setPaid(false);
+        event1.setParticipantLimit(10);
+        event1.setRequestModeration(true);
+
+        event2 = new Event();
+        event2.setAnnotation("Тестовое событие 2");
+        event2.setDescription("Описание события 2");
+        event2.setTitle("Событие 2");
+        event2.setCategory(category);
+        event2.setInitiator(initiator);
+        event2.setLocation(location);
+        event2.setEventDate(now.plusDays(10));
+        event2.setCreatedOn(now);
+        event2.setState(EventState.PUBLISHED);
+        event2.setPaid(true);
+        event2.setParticipantLimit(20);
+        event2.setRequestModeration(false);
+
+        event1 = eventRepository.save(event1);
+        event2 = eventRepository.save(event2);
+    }
+
+    @Test
+    void findAllByAdminFilters_shouldReturnAllEvents_whenNoFilters() {
+        Page<Event> result = eventRepository.findAllByAdminFilters(
+                null, null, null, null, null, PageRequest.of(0, 10)
+        );
+
+        assertThat(result.getContent()).hasSize(2);
+    }
+
+    @Test
+    void findAllByAdminFilters_shouldFilterByUsers() {
+        Page<Event> result = eventRepository.findAllByAdminFilters(
+                List.of(initiator.getId()), null, null, null, null, PageRequest.of(0, 10)
+        );
+
+        assertThat(result.getContent()).hasSize(2);
+    }
+
+    @Test
+    void findAllByAdminFilters_shouldFilterByStates() {
+        Page<Event> result = eventRepository.findAllByAdminFilters(
+                null, List.of(EventState.PENDING), null, null, null, PageRequest.of(0, 10)
+        );
+
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getContent().get(0).getState()).isEqualTo(EventState.PENDING);
+    }
+
+    @Test
+    void findAllByAdminFilters_shouldFilterByCategories() {
+        Page<Event> result = eventRepository.findAllByAdminFilters(
+                null, null, List.of(category.getId()), null, null, PageRequest.of(0, 10)
+        );
+
+        assertThat(result.getContent()).hasSize(2);
+    }
+
+    @Test
+    void findAllByAdminFilters_shouldFilterByDateRange() {
+        Page<Event> result = eventRepository.findAllByAdminFilters(
+                null, null, null, now.plusDays(1), now.plusDays(7), PageRequest.of(0, 10)
+        );
+
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getContent().get(0).getEventDate()).isBefore(now.plusDays(7));
+    }
+
+    @Test
+    void findAllByAdminFilters_shouldReturnEmpty_whenNoMatches() {
+        Page<Event> result = eventRepository.findAllByAdminFilters(
+                null, null, null, now.plusDays(20), now.plusDays(30), PageRequest.of(0, 10)
+        );
+
+        assertThat(result.getContent()).isEmpty();
+    }
+
+    @Test
+    void findAllByAdminFilters_shouldHandleAllFiltersTogether() {
+        Page<Event> result = eventRepository.findAllByAdminFilters(
+                List.of(initiator.getId()),
+                List.of(EventState.PENDING),
+                List.of(category.getId()),
+                now.plusDays(1),
+                now.plusDays(7),
+                PageRequest.of(0, 10)
+        );
+
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getContent().get(0).getId()).isEqualTo(event1.getId());
+    }
+
+    @Test
+    void findAllByAdminFilters_shouldRespectPagination() {
+        Page<Event> page1 = eventRepository.findAllByAdminFilters(
+                null, null, null, null, null, PageRequest.of(0, 1)
+        );
+        Page<Event> page2 = eventRepository.findAllByAdminFilters(
+                null, null, null, null, null, PageRequest.of(1, 1)
+        );
+
+        assertThat(page1.getContent()).hasSize(1);
+        assertThat(page2.getContent()).hasSize(1);
+        assertThat(page1.getContent().get(0).getId()).isNotEqualTo(page2.getContent().get(0).getId());
+    }
+}

@@ -14,12 +14,12 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 
+import static ru.practicum.common.config.JacksonConfig.DATE_TIME_FORMAT;
+
 @RestController
 @RequiredArgsConstructor
 @Slf4j
 public class StatsController {
-
-    private static final String DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
     private final StatsService service;
 
     @GetMapping("/stats")
