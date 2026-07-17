@@ -8,21 +8,23 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.common.entity.Category;
+import ru.practicum.common.entity.User;
 import ru.practicum.common.enums.AdminStateAction;
 import ru.practicum.common.enums.EventState;
+import ru.practicum.common.exception.BadRequestException;
 import ru.practicum.common.exception.ConflictException;
 import ru.practicum.common.exception.NotFoundException;
 import ru.practicum.dto.ViewStats;
-import ru.practicum.mainservice.categories.repository.CategoryRepository;
+import ru.practicum.mainservice.categories.service.CategoryService;
 import ru.practicum.mainservice.events.dto.*;
 import ru.practicum.mainservice.events.entity.Event;
 import ru.practicum.mainservice.events.mapper.EventMapper;
 import ru.practicum.mainservice.events.repository.EventRepository;
+import ru.practicum.mainservice.users.service.UserService;
 import ru.practicum.statistics.client.StatsClient;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -33,12 +35,13 @@ public class EventServiceImpl implements EventService {
     private EventRepository repository;
     private EventMapper mapper;
     private StatsClient statsClient;
-    private CategoryRepository categoryRepository;
+    private UserService userService;
+    private CategoryService categoryService;
 
     @Override
     public List<EventFullDto> getAdminEvents(List<Long> users, List<EventState> states, List<Long> categories,
                                              LocalDateTime rangeStart, LocalDateTime rangeEnd, int from, int size) {
-        Pageable pagebale = PageRequest.of(from /size, size); // TODO разобраться подробнее
+        Pageable pagebale = PageRequest.of(from / size, size);
         Page<Event> page = repository.findAllByAdminFilters(users, states, categories, rangeStart, rangeEnd, pagebale);
         return page.getContent().stream()
                 .map(this::enrichWithViewsAndRequests)
@@ -71,7 +74,7 @@ public class EventServiceImpl implements EventService {
 
         Category category = null;
         if (request.getCategory() != null) {
-            category = categoryRepository.getReferenceById(request.getCategory());
+            category = getCategoryEntity(request.getCategory());
         }
 
         mapper.updateFromAdmin(request, category, event);
@@ -94,22 +97,98 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public List<EventShortDto> getUserEvents(Long userId, int from, int size) {
-        return List.of();
+        log.info("Getting events for user: userId={}", userId);
+
+        getUserEntity(userId);
+
+        Pageable pageable = PageRequest.of(from / size, size);
+        Page<Event> page = repository.findByInitiatorId(userId, pageable);
+
+        return page.getContent().stream()
+                .map(mapper::toShortDto)
+                .collect(Collectors.toList());
     }
 
     @Override
+    @Transactional
     public EventFullDto createEvent(Long userId, NewEventDto dto) {
-        return null;
+        log.info("Creating event for user: userId={}, dto={}", userId, dto);
+
+        User user = getUserEntity(userId);
+
+        Category category = getCategoryEntity(dto.getCategory());
+
+        if (dto.getEventDate().isBefore(LocalDateTime.now().plusHours(2))) {
+            throw new BadRequestException("Event date must be at least 2 hours from now");
+        }
+
+        Event event = mapper.toEntity(dto, category, user);
+        event.setState(EventState.PENDING);
+        event.setCreatedOn(LocalDateTime.now());
+
+        event = repository.save(event);
+        log.info("Created event with id: {}", event.getId());
+
+        return mapper.toFullDto(event);
     }
 
     @Override
     public EventFullDto getUserEvent(Long userId, Long eventId) {
-        return null;
+        log.info("Getting event for user: userId={}, eventId={}", userId, eventId);
+
+        getUserEntity(userId);
+
+        Event event = getEventEntity(eventId);
+
+        if (!event.getInitiator().getId().equals(userId)) {
+            throw new NotFoundException("Event with id " + eventId + " not found for user " + userId);
+        }
+
+        return mapper.toFullDto(event);
     }
 
     @Override
+    @Transactional
     public EventFullDto updateUserEvent(Long userId, Long eventId, UpdateEventUserRequest request) {
-        return null;
+        log.info("Updating event by user: userId={}, eventId={}, request={}", userId, eventId, request);
+
+        getUserEntity(userId);
+
+        Event event = getEventEntity(eventId);
+
+        if (!event.getInitiator().getId().equals(userId)) {
+            throw new NotFoundException("Event with id " + eventId + " not found for user " + userId);
+        }
+
+        if (event.getState() == EventState.PUBLISHED) {
+            throw new ConflictException("Only pending or canceled events can be changed");
+        }
+
+        if (request.getEventDate() != null &&
+                request.getEventDate().isBefore(LocalDateTime.now().plusHours(2))) {
+            throw new BadRequestException("Event date must be at least 2 hours from now");
+        }
+
+        Category category = null;
+
+        if (request.getCategory() != null) {
+            category = getCategoryEntity(request.getCategory());
+        }
+
+        mapper.updateFromUser(request, category, event);
+
+        if (request.getStateAction() != null) {
+            switch (request.getStateAction()) {
+                case SEND_TO_REVIEW -> event.setState(EventState.PENDING);
+                case CANCEL_REVIEW -> event.setState(EventState.CANCELED);
+                default -> throw new BadRequestException("Unknown state action: " + request.getStateAction());
+            }
+        }
+
+        event = repository.save(event);
+        log.info("Updated event with id: {}", eventId);
+
+        return mapper.toFullDto(event);
     }
 
     @Override
@@ -130,12 +209,15 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public boolean existsById(Long eventId) {
-        return false;
+        return repository.existsById(eventId);
     }
 
     @Override
     public List<Event> findAllByIds(List<Long> eventIds) {
-        return List.of();
+        if (eventIds == null || eventIds.isEmpty()) {
+            return List.of();
+        }
+        return repository.findAllById(eventIds);
     }
 
     private EventFullDto enrichWithViewsAndRequests(Event event) {
@@ -164,5 +246,13 @@ public class EventServiceImpl implements EventService {
             log.warn("Failed to get views for event {}", event.getId(), e);
             return 0;
         }
+    }
+
+    private User getUserEntity(Long userId) {
+        return userService.getUserEntity(userId);
+    }
+
+    private Category getCategoryEntity(Long categoryId) {
+        return categoryService.getCategoryEntity(categoryId);
     }
 }

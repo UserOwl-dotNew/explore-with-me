@@ -4,7 +4,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -177,6 +176,62 @@ public class EventRepositoryTest {
         );
 
         assertThat(page1.getContent()).hasSize(1);
+        assertThat(page2.getContent()).hasSize(1);
+        assertThat(page1.getContent().get(0).getId()).isNotEqualTo(page2.getContent().get(0).getId());
+    }
+
+    @Test
+    void findByInitiatorId_shouldReturnEventsByUser() {
+        Page<Event> result = eventRepository.findByInitiatorId(initiator.getId(), PageRequest.of(0, 10));
+
+        assertThat(result.getContent()).hasSize(2);
+        assertThat(result.getContent().get(0).getInitiator().getId()).isEqualTo(initiator.getId());
+        assertThat(result.getContent().get(1).getInitiator().getId()).isEqualTo(initiator.getId());
+    }
+
+    @Test
+    void findByInitiatorId_shouldReturnEmpty_whenUserHasNoEvents() {
+        User otherUser = new User();
+        otherUser.setName("Другой пользователь");
+        otherUser.setEmail("other@mail.ru");
+        otherUser = userRepository.save(otherUser);
+
+        Page<Event> result = eventRepository.findByInitiatorId(
+                otherUser.getId(), PageRequest.of(0, 10)
+        );
+
+        assertThat(result.getContent()).isEmpty();
+    }
+
+    @Test
+    void findByInitiatorId_shouldRespectPagination() {
+        Location location = new Location();
+        location.setLat(55.754167f);
+        location.setLon(37.62f);
+
+        Event event3 = new Event();
+        event3.setAnnotation("Тестовое событие 3");
+        event3.setDescription("Описание события 3");
+        event3.setTitle("Событие 3");
+        event3.setCategory(category);
+        event3.setInitiator(initiator);
+        event3.setLocation(location);
+        event3.setEventDate(now.plusDays(15));
+        event3.setCreatedOn(now);
+        event3.setState(EventState.PENDING);
+        event3.setPaid(false);
+        event3.setParticipantLimit(10);
+        event3.setRequestModeration(true);
+        eventRepository.save(event3);
+
+        Page<Event> page1 = eventRepository.findByInitiatorId(
+                initiator.getId(), PageRequest.of(0, 2)
+        );
+        Page<Event> page2 = eventRepository.findByInitiatorId(
+                initiator.getId(), PageRequest.of(1, 2)
+        );
+
+        assertThat(page1.getContent()).hasSize(2);
         assertThat(page2.getContent()).hasSize(1);
         assertThat(page1.getContent().get(0).getId()).isNotEqualTo(page2.getContent().get(0).getId());
     }

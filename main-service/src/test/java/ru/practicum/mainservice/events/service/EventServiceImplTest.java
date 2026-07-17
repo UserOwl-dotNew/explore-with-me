@@ -17,14 +17,17 @@ import ru.practicum.common.entity.Location;
 import ru.practicum.common.entity.User;
 import ru.practicum.common.enums.AdminStateAction;
 import ru.practicum.common.enums.EventState;
+import ru.practicum.common.enums.UserStateAction;
+import ru.practicum.common.exception.BadRequestException;
 import ru.practicum.common.exception.ConflictException;
 import ru.practicum.common.exception.NotFoundException;
 import ru.practicum.mainservice.categories.repository.CategoryRepository;
-import ru.practicum.mainservice.events.dto.EventFullDto;
-import ru.practicum.mainservice.events.dto.UpdateEventAdminRequest;
+import ru.practicum.mainservice.categories.service.CategoryService;
+import ru.practicum.mainservice.events.dto.*;
 import ru.practicum.mainservice.events.entity.Event;
 import ru.practicum.mainservice.events.mapper.EventMapper;
 import ru.practicum.mainservice.events.repository.EventRepository;
+import ru.practicum.mainservice.users.service.UserService;
 import ru.practicum.statistics.client.StatsClient;
 
 import java.time.LocalDateTime;
@@ -54,6 +57,12 @@ public class EventServiceImplTest {
 
     @InjectMocks
     private EventServiceImpl eventService;
+
+    @Mock
+    private UserService userService;
+
+    @Mock
+    private CategoryService categoryService;
 
     private Event event;
     private EventFullDto eventFullDto;
@@ -200,7 +209,7 @@ public class EventServiceImplTest {
     @Test
     void updateAdminEvent_shouldPublishEventSuccessfully() {
         when(eventRepository.findById(1L)).thenReturn(Optional.of(event));
-        when(categoryRepository.getReferenceById(1L)).thenReturn(category);
+        when(categoryService.getCategoryEntity(1L)).thenReturn(category);
         when(eventRepository.save(event)).thenReturn(event);
         when(eventMapper.toFullDto(event)).thenReturn(eventFullDto);
 
@@ -270,7 +279,7 @@ public class EventServiceImplTest {
     void updateAdminEvent_shouldRejectEventSuccessfully() {
         updateRequest.setStateAction(AdminStateAction.REJECT_EVENT);
         when(eventRepository.findById(1L)).thenReturn(Optional.of(event));
-        when(categoryRepository.getReferenceById(1L)).thenReturn(category);
+        when(categoryService.getCategoryEntity(1L)).thenReturn(category);
         when(eventRepository.save(event)).thenReturn(event);
         when(eventMapper.toFullDto(event)).thenReturn(eventFullDto);
 
@@ -341,5 +350,322 @@ public class EventServiceImplTest {
         assertThatThrownBy(() -> eventService.getEventEntity(999L))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessageContaining("Event with id 999 was not found");
+    }
+
+    @Test
+    void getUserEvents_shouldReturnListOfEvents() {
+        Long userId = 1L;
+        Page<Event> eventPage = new PageImpl<>(List.of(event));
+
+        when(eventRepository.findByInitiatorId(eq(userId), any(PageRequest.class)))
+                .thenReturn(eventPage);
+        when(eventMapper.toShortDto(any(Event.class)))
+                .thenReturn(createEventShortDto(event));
+
+        List<EventShortDto> result = eventService.getUserEvents(userId, 0, 10);
+
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getId()).isEqualTo(1L);
+        verify(eventRepository).findByInitiatorId(eq(userId), any(PageRequest.class));
+    }
+
+    @Test
+    void getUserEvents_shouldReturnEmpty_whenUserHasNoEvents() {
+        Long userId = 1L;
+        Page<Event> emptyPage = new PageImpl<>(List.of());
+
+        when(eventRepository.findByInitiatorId(eq(userId), any(PageRequest.class)))
+                .thenReturn(emptyPage);
+
+        List<EventShortDto> result = eventService.getUserEvents(userId, 0, 10);
+
+        assertThat(result).isEmpty();
+        verify(eventRepository).findByInitiatorId(eq(userId), any(PageRequest.class));
+    }
+
+    @Test
+    void createEvent_shouldCreateEventSuccessfully() {
+        Long userId = 1L;
+        NewEventDto newEventDto = createNewEventDto();
+        Event newEvent = createNewEvent();
+
+        when(categoryService.getCategoryEntity(1L)).thenReturn(category);
+        when(userService.getUserEntity(userId)).thenReturn(initiator);
+        when(eventMapper.toEntity(any(NewEventDto.class), any(Category.class), any(User.class)))
+                .thenReturn(newEvent);
+        when(eventRepository.save(any(Event.class))).thenReturn(event);
+        when(eventMapper.toFullDto(any(Event.class))).thenReturn(eventFullDto);
+
+        EventFullDto result = eventService.createEvent(userId, newEventDto);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getId()).isEqualTo(1L);
+        verify(eventRepository).save(any(Event.class));
+    }
+
+    @Test
+    void createEvent_shouldThrowBadRequest_whenEventDateTooSoon() {
+        Long userId = 1L;
+        NewEventDto newEventDto = createNewEventDto();
+        newEventDto.setEventDate(LocalDateTime.now().plusMinutes(30));
+
+        when(userService.getUserEntity(userId)).thenReturn(initiator);
+        when(categoryService.getCategoryEntity(1L)).thenReturn(category);
+
+        assertThatThrownBy(() -> eventService.createEvent(userId, newEventDto))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessageContaining("Event date must be at least 2 hours from now");
+
+        verify(eventRepository, never()).save(any(Event.class));
+    }
+
+    @Test
+    void createEvent_shouldThrowNotFoundException_whenCategoryNotFound() {
+        Long userId = 1L;
+        NewEventDto newEventDto = createNewEventDto();
+
+        when(userService.getUserEntity(userId)).thenReturn(initiator);
+        when(categoryService.getCategoryEntity(1L))
+                .thenThrow(new NotFoundException("Category with id 1 was not found"));
+
+        assertThatThrownBy(() -> eventService.createEvent(userId, newEventDto))
+                .isInstanceOf(NotFoundException.class)
+                .hasMessageContaining("Category with id 1 was not found");
+
+        verify(eventRepository, never()).save(any(Event.class));
+    }
+
+    @Test
+    void getUserEvent_shouldReturnEvent_whenUserIsInitiator() {
+        Long userId = 1L;
+        Long eventId = 1L;
+
+        when(userService.getUserEntity(userId)).thenReturn(initiator);
+        when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
+        when(eventMapper.toFullDto(event)).thenReturn(eventFullDto);
+
+        EventFullDto result = eventService.getUserEvent(userId, eventId);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getId()).isEqualTo(1L);
+        verify(eventRepository).findById(eventId);
+    }
+
+    @Test
+    void getUserEvent_shouldThrowNotFoundException_whenEventNotFound() {
+        Long userId = 1L;
+        Long eventId = 999L;
+
+        when(userService.getUserEntity(userId)).thenReturn(initiator);
+        when(eventRepository.findById(eventId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> eventService.getUserEvent(userId, eventId))
+                .isInstanceOf(NotFoundException.class)
+                .hasMessageContaining("Event with id 999 was not found");
+    }
+
+    @Test
+    void getUserEvent_shouldThrowNotFoundException_whenUserIsNotInitiator() {
+        Long userId = 2L;
+        Long eventId = 1L;
+        User otherUser = new User();
+        otherUser.setId(2L);
+        otherUser.setName("Другой пользователь");
+
+        when(userService.getUserEntity(userId)).thenReturn(otherUser);
+        when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
+
+        assertThatThrownBy(() -> eventService.getUserEvent(userId, eventId))
+                .isInstanceOf(NotFoundException.class)
+                .hasMessageContaining("Event with id 1 not found for user 2");
+    }
+
+    @Test
+    void updateUserEvent_shouldUpdateEventSuccessfully() {
+        Long userId = 1L;
+        Long eventId = 1L;
+        UpdateEventUserRequest request = createUpdateEventUserRequest();
+        Category newCategory = new Category();
+        newCategory.setId(2L);
+        newCategory.setName("Спорт");
+
+        when(userService.getUserEntity(userId)).thenReturn(initiator);
+        when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
+        when(categoryService.getCategoryEntity(2L)).thenReturn(newCategory);
+        when(eventRepository.save(event)).thenReturn(event);
+        when(eventMapper.toFullDto(event)).thenReturn(eventFullDto);
+
+        doAnswer(invocation -> {
+            UpdateEventUserRequest req = invocation.getArgument(0);
+            Category cat = invocation.getArgument(1);
+            Event eventToUpdate = invocation.getArgument(2);
+            if (req.getAnnotation() != null) {
+                eventToUpdate.setAnnotation(req.getAnnotation());
+            }
+            if (req.getCategory() != null) {
+                eventToUpdate.setCategory(cat);
+            }
+            if (req.getEventDate() != null) {
+                eventToUpdate.setEventDate(req.getEventDate());
+            }
+            if (req.getStateAction() != null) {
+                // Статус меняется в сервисе, не здесь
+            }
+            return null;
+        }).when(eventMapper).updateFromUser(any(UpdateEventUserRequest.class), any(Category.class), any(Event.class));
+
+        EventFullDto result = eventService.updateUserEvent(userId, eventId, request);
+
+        assertThat(result).isNotNull();
+        verify(eventRepository).save(event);
+    }
+
+    @Test
+    void updateUserEvent_shouldThrowNotFoundException_whenUserIsNotInitiator() {
+        Long userId = 2L;
+        Long eventId = 1L;
+        UpdateEventUserRequest request = createUpdateEventUserRequest();
+        User otherUser = new User();
+        otherUser.setId(2L);
+
+        when(userService.getUserEntity(userId)).thenReturn(otherUser);
+        when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
+
+        assertThatThrownBy(() -> eventService.updateUserEvent(userId, eventId, request))
+                .isInstanceOf(NotFoundException.class)
+                .hasMessageContaining("Event with id 1 not found for user 2");
+
+        verify(eventRepository, never()).save(any(Event.class));
+    }
+
+    @Test
+    void updateUserEvent_shouldThrowConflictException_whenEventIsPublished() {
+        Long userId = 1L;
+        Long eventId = 1L;
+        UpdateEventUserRequest request = createUpdateEventUserRequest();
+
+        event.setState(EventState.PUBLISHED);
+
+        when(userService.getUserEntity(userId)).thenReturn(initiator);
+        when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
+
+        assertThatThrownBy(() -> eventService.updateUserEvent(userId, eventId, request))
+                .isInstanceOf(ConflictException.class)
+                .hasMessageContaining("Only pending or canceled events can be changed");
+
+        verify(eventRepository, never()).save(any(Event.class));
+    }
+
+    @Test
+    void updateUserEvent_shouldThrowBadRequest_whenEventDateTooSoon() {
+        Long userId = 1L;
+        Long eventId = 1L;
+        UpdateEventUserRequest request = createUpdateEventUserRequest();
+        request.setEventDate(LocalDateTime.now().plusMinutes(30));
+
+        when(userService.getUserEntity(userId)).thenReturn(initiator);
+        when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
+
+        assertThatThrownBy(() -> eventService.updateUserEvent(userId, eventId, request))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessageContaining("Event date must be at least 2 hours from now");
+
+        verify(eventRepository, never()).save(any(Event.class));
+    }
+
+    @Test
+    void updateUserEvent_shouldChangeStatusToPending_whenSendToReview() {
+        Long userId = 1L;
+        Long eventId = 1L;
+        UpdateEventUserRequest request = createUpdateEventUserRequest();
+        request.setStateAction(UserStateAction.SEND_TO_REVIEW);
+
+        event.setState(EventState.CANCELED);
+
+        when(userService.getUserEntity(userId)).thenReturn(initiator);
+        when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
+        when(eventRepository.save(event)).thenReturn(event);
+        when(eventMapper.toFullDto(event)).thenReturn(eventFullDto);
+
+        eventService.updateUserEvent(userId, eventId, request);
+
+        assertThat(event.getState()).isEqualTo(EventState.PENDING);
+        verify(eventRepository).save(event);
+    }
+
+    @Test
+    void updateUserEvent_shouldChangeStatusToCanceled_whenCancelReview() {
+        Long userId = 1L;
+        Long eventId = 1L;
+        UpdateEventUserRequest request = createUpdateEventUserRequest();
+        request.setStateAction(UserStateAction.CANCEL_REVIEW);
+
+        event.setState(EventState.PENDING);
+
+        when(userService.getUserEntity(userId)).thenReturn(initiator);
+        when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
+        when(eventRepository.save(event)).thenReturn(event);
+        when(eventMapper.toFullDto(event)).thenReturn(eventFullDto);
+
+        eventService.updateUserEvent(userId, eventId, request);
+
+        assertThat(event.getState()).isEqualTo(EventState.CANCELED);
+        verify(eventRepository).save(event);
+    }
+
+    private EventShortDto createEventShortDto(Event event) {
+        EventShortDto dto = new EventShortDto();
+        dto.setId(event.getId());
+        dto.setAnnotation(event.getAnnotation());
+        dto.setTitle(event.getTitle());
+        dto.setPaid(event.getPaid());
+        dto.setEventDate(event.getEventDate());
+        return dto;
+    }
+
+    private NewEventDto createNewEventDto() {
+        NewEventDto dto = new NewEventDto();
+        dto.setAnnotation("Новое событие");
+        dto.setDescription("Описание нового события");
+        dto.setTitle("Новое событие");
+        dto.setCategory(1L);
+        dto.setEventDate(LocalDateTime.now().plusDays(3));
+        dto.setLocation(new LocationDto(55.754167f, 37.62f));
+        dto.setPaid(false);
+        dto.setParticipantLimit(10);
+        dto.setRequestModeration(true);
+        return dto;
+    }
+
+    private Event createNewEvent() {
+        Event newEvent = new Event();
+        newEvent.setId(1L);
+        newEvent.setAnnotation("Новое событие");
+        newEvent.setDescription("Описание нового события");
+        newEvent.setTitle("Новое событие");
+        newEvent.setCategory(category);
+        newEvent.setInitiator(initiator);
+        newEvent.setLocation(new Location(55.754167f, 37.62f));
+        newEvent.setEventDate(LocalDateTime.now().plusDays(3));
+        newEvent.setCreatedOn(LocalDateTime.now());
+        newEvent.setState(EventState.PENDING);
+        newEvent.setPaid(false);
+        newEvent.setParticipantLimit(10);
+        newEvent.setRequestModeration(true);
+        return newEvent;
+    }
+
+    private UpdateEventUserRequest createUpdateEventUserRequest() {
+        UpdateEventUserRequest request = new UpdateEventUserRequest();
+        request.setAnnotation("Обновленная аннотация");
+        request.setDescription("Обновленное описание");
+        request.setTitle("Обновленное название");
+        request.setCategory(2L);
+        request.setEventDate(LocalDateTime.now().plusDays(5));
+        request.setPaid(true);
+        request.setParticipantLimit(20);
+        request.setRequestModeration(false);
+        request.setStateAction(UserStateAction.SEND_TO_REVIEW);
+        return request;
     }
 }
