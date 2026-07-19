@@ -21,6 +21,7 @@ import ru.practicum.common.enums.UserStateAction;
 import ru.practicum.common.exception.BadRequestException;
 import ru.practicum.common.exception.ConflictException;
 import ru.practicum.common.exception.NotFoundException;
+import ru.practicum.dto.EndpointHit;
 import ru.practicum.mainservice.categories.repository.CategoryRepository;
 import ru.practicum.mainservice.categories.service.CategoryService;
 import ru.practicum.mainservice.events.dto.*;
@@ -611,6 +612,158 @@ public class EventServiceImplTest {
 
         assertThat(event.getState()).isEqualTo(EventState.CANCELED);
         verify(eventRepository).save(event);
+    }
+
+    @Test
+    void getPublicEvents_shouldReturnPublishedEvents() {
+        List<Event> events = List.of(event);
+        Page<Event> eventPage = new PageImpl<>(events);
+
+        when(eventRepository.findPublishedEvents(
+                isNull(), isNull(), isNull(), any(LocalDateTime.class), isNull(), any(PageRequest.class)
+        )).thenReturn(eventPage);
+        when(eventMapper.toShortDto(event)).thenReturn(createEventShortDto(event));
+
+        List<EventShortDto> result = eventService.getPublicEvents(
+                null, null, null, null, null, false, null, 0, 10
+        );
+
+        assertThat(result).hasSize(1);
+        verify(eventRepository).findPublishedEvents(
+                isNull(), isNull(), isNull(), any(LocalDateTime.class), isNull(), any(PageRequest.class)
+        );
+    }
+
+    @Test
+    void getPublicEvents_shouldApplyDateRangeStart_whenNull() {
+        List<Event> events = List.of(event);
+        Page<Event> eventPage = new PageImpl<>(events);
+
+        when(eventRepository.findPublishedEvents(
+                isNull(), isNull(), isNull(), any(LocalDateTime.class), isNull(), any(PageRequest.class)
+        )).thenReturn(eventPage);
+        when(eventMapper.toShortDto(event)).thenReturn(createEventShortDto(event));
+
+        eventService.getPublicEvents(null, null, null, null, null, false, null, 0, 10);
+
+        verify(eventRepository).findPublishedEvents(
+                isNull(), isNull(), isNull(), argThat(date -> date != null), isNull(), any(PageRequest.class)
+        );
+    }
+
+    @Test
+    void getPublicEvents_shouldFilterByText() {
+        List<Event> events = List.of(event);
+        Page<Event> eventPage = new PageImpl<>(events);
+        String text = "test";
+
+        when(eventRepository.findPublishedEvents(
+                eq(text), isNull(), isNull(), any(LocalDateTime.class), isNull(), any(PageRequest.class)
+        )).thenReturn(eventPage);
+        when(eventMapper.toShortDto(event)).thenReturn(createEventShortDto(event));
+
+        eventService.getPublicEvents(text, null, null, null, null, false, null, 0, 10);
+
+        verify(eventRepository).findPublishedEvents(
+                eq(text), isNull(), isNull(), any(LocalDateTime.class), isNull(), any(PageRequest.class)
+        );
+    }
+
+    @Test
+    void getPublicEvents_shouldFilterByCategories() {
+        List<Long> categories = List.of(1L, 2L);
+        List<Event> events = List.of(event);
+        Page<Event> eventPage = new PageImpl<>(events);
+
+        when(eventRepository.findPublishedEvents(
+                isNull(), eq(categories), isNull(), any(LocalDateTime.class), isNull(), any(PageRequest.class)
+        )).thenReturn(eventPage);
+        when(eventMapper.toShortDto(event)).thenReturn(createEventShortDto(event));
+
+        eventService.getPublicEvents(null, categories, null, null, null, false, null, 0, 10);
+
+        verify(eventRepository).findPublishedEvents(
+                isNull(), eq(categories), isNull(), any(LocalDateTime.class), isNull(), any(PageRequest.class)
+        );
+    }
+
+    @Test
+    void getPublicEvents_shouldFilterByPaid() {
+        List<Event> events = List.of(event);
+        Page<Event> eventPage = new PageImpl<>(events);
+
+        when(eventRepository.findPublishedEvents(
+                isNull(), isNull(), eq(true), any(LocalDateTime.class), isNull(), any(PageRequest.class)
+        )).thenReturn(eventPage);
+        when(eventMapper.toShortDto(event)).thenReturn(createEventShortDto(event));
+
+        eventService.getPublicEvents(null, null, true, null, null, false, null, 0, 10);
+
+        verify(eventRepository).findPublishedEvents(
+                isNull(), isNull(), eq(true), any(LocalDateTime.class), isNull(), any(PageRequest.class)
+        );
+    }
+
+    @Test
+    void getPublicEvents_shouldSortByEventDate_whenSortIsNull() {
+        List<Event> events = List.of(event);
+        Page<Event> eventPage = new PageImpl<>(events);
+
+        when(eventRepository.findPublishedEvents(
+                isNull(), isNull(), isNull(), any(LocalDateTime.class), isNull(), any(PageRequest.class)
+        )).thenReturn(eventPage);
+        when(eventMapper.toShortDto(event)).thenReturn(createEventShortDto(event));
+
+        eventService.getPublicEvents(null, null, null, null, null, false, null, 0, 10);
+
+        verify(eventRepository).findPublishedEvents(
+                isNull(), isNull(), isNull(), any(LocalDateTime.class), isNull(),
+                argThat(pageable -> pageable.getSort().isSorted() &&
+                        pageable.getSort().getOrderFor("eventDate") != null)
+        );
+    }
+
+    @Test
+    void getPublicEvent_shouldReturnEvent_whenPublished() {
+        Long eventId = 1L;
+        event.setState(EventState.PUBLISHED);
+        event.setPublishedOn(LocalDateTime.now().minusDays(1));
+
+        when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
+        when(eventMapper.toFullDto(event)).thenReturn(eventFullDto);
+        when(statsClient.getStats(anyString(), anyString(), anyList(), eq(true)))
+                .thenReturn(List.of());
+
+        EventFullDto result = eventService.getPublicEvent(eventId);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getId()).isEqualTo(1L);
+        verify(statsClient, times(1)).sendHit(any(EndpointHit.class));
+    }
+
+    @Test
+    void getPublicEvent_shouldThrowNotFoundException_whenNotPublished() {
+        Long eventId = 1L;
+        event.setState(EventState.PENDING);
+
+        when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
+
+        assertThatThrownBy(() -> eventService.getPublicEvent(eventId))
+                .isInstanceOf(NotFoundException.class)
+                .hasMessageContaining("Event with id 1 not found");
+
+        verify(statsClient, never()).sendHit(any(EndpointHit.class));
+    }
+
+    @Test
+    void getPublicEvent_shouldThrowNotFoundException_whenEventNotFound() {
+        Long eventId = 999L;
+
+        when(eventRepository.findById(eventId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> eventService.getPublicEvent(eventId))
+                .isInstanceOf(NotFoundException.class)
+                .hasMessageContaining("Event with id 999 was not found");
     }
 
     private EventShortDto createEventShortDto(Event event) {

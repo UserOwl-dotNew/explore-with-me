@@ -235,4 +235,116 @@ public class EventRepositoryTest {
         assertThat(page2.getContent()).hasSize(1);
         assertThat(page1.getContent().get(0).getId()).isNotEqualTo(page2.getContent().get(0).getId());
     }
+
+    @Test
+    void findPublishedEvents_shouldReturnOnlyPublishedEvents() {
+
+        Page<Event> result = eventRepository.findPublishedEvents(
+                null, null, null, now.minusDays(1), null, PageRequest.of(0, 10)
+        );
+
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getContent().get(0).getState()).isEqualTo(EventState.PUBLISHED);
+        assertThat(result.getContent().get(0).getId()).isEqualTo(event2.getId());
+    }
+
+    @Test
+    void findPublishedEvents_shouldFilterByText() {
+        Page<Event> result = eventRepository.findPublishedEvents(
+                "Тестовое событие 2", null, null, now.minusDays(1), null, PageRequest.of(0, 10)
+        );
+
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getContent().get(0).getAnnotation()).contains("Тестовое событие 2");
+    }
+
+    @Test
+    void findPublishedEvents_shouldFilterByCategories() {
+        Page<Event> result = eventRepository.findPublishedEvents(
+                null, List.of(category.getId()), null, now.minusDays(1), null, PageRequest.of(0, 10)
+        );
+
+        assertThat(result.getContent()).hasSize(1);
+    }
+
+    @Test
+    void findPublishedEvents_shouldFilterByPaid() {
+        Page<Event> result = eventRepository.findPublishedEvents(
+                null, null, true, now.minusDays(1), null, PageRequest.of(0, 10)
+        );
+
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getContent().get(0).getPaid()).isTrue();
+    }
+
+    @Test
+    void findPublishedEvents_shouldFilterByDateRange() {
+        Page<Event> result = eventRepository.findPublishedEvents(
+                null, null, null, now.plusDays(5), now.plusDays(15), PageRequest.of(0, 10)
+        );
+
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getContent().get(0).getId()).isEqualTo(event2.getId());
+    }
+
+    @Test
+    void findPublishedEvents_shouldReturnEmpty_whenNoPublishedEvents() {
+        Location location = new Location();
+        location.setLat(55.754167f);
+        location.setLon(37.62f);
+
+        Event event3 = new Event();
+        event3.setAnnotation("Тестовое событие 3");
+        event3.setDescription("Описание события 3");
+        event3.setTitle("Событие 3");
+        event3.setCategory(category);
+        event3.setInitiator(initiator);
+        event3.setLocation(location);
+        event3.setEventDate(now.plusDays(20));
+        event3.setCreatedOn(now);
+        event3.setState(EventState.PENDING);
+        event3.setPaid(false);
+        event3.setParticipantLimit(10);
+        event3.setRequestModeration(true);
+        eventRepository.save(event3);
+
+        Page<Event> result = eventRepository.findPublishedEvents(
+                null, null, null, now.plusDays(15), now.plusDays(25), PageRequest.of(0, 10)
+        );
+
+        assertThat(result.getContent()).isEmpty();
+    }
+
+    @Test
+    void findPublishedEvents_shouldRespectPagination() {
+        Location location = new Location();
+        location.setLat(55.754167f);
+        location.setLon(37.62f);
+
+        Event event3 = new Event();
+        event3.setAnnotation("Тестовое событие 3");
+        event3.setDescription("Описание события 3");
+        event3.setTitle("Событие 3");
+        event3.setCategory(category);
+        event3.setInitiator(initiator);
+        event3.setLocation(location);
+        event3.setEventDate(now.plusDays(15));
+        event3.setCreatedOn(now);
+        event3.setState(EventState.PUBLISHED);
+        event3.setPaid(false);
+        event3.setParticipantLimit(10);
+        event3.setRequestModeration(true);
+        eventRepository.save(event3);
+
+        Page<Event> page1 = eventRepository.findPublishedEvents(
+                null, null, null, now.minusDays(1), null, PageRequest.of(0, 1)
+        );
+        Page<Event> page2 = eventRepository.findPublishedEvents(
+                null, null, null, now.minusDays(1), null, PageRequest.of(1, 1)
+        );
+
+        assertThat(page1.getContent()).hasSize(1);
+        assertThat(page2.getContent()).hasSize(1);
+        assertThat(page1.getContent().get(0).getId()).isNotEqualTo(page2.getContent().get(0).getId());
+    }
 }

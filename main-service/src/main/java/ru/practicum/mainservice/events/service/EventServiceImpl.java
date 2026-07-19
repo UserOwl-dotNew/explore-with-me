@@ -5,15 +5,18 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.common.entity.Category;
 import ru.practicum.common.entity.User;
 import ru.practicum.common.enums.AdminStateAction;
 import ru.practicum.common.enums.EventState;
+import ru.practicum.common.enums.SortType;
 import ru.practicum.common.exception.BadRequestException;
 import ru.practicum.common.exception.ConflictException;
 import ru.practicum.common.exception.NotFoundException;
+import ru.practicum.dto.EndpointHit;
 import ru.practicum.dto.ViewStats;
 import ru.practicum.mainservice.categories.service.CategoryService;
 import ru.practicum.mainservice.events.dto.*;
@@ -24,12 +27,14 @@ import ru.practicum.mainservice.users.service.UserService;
 import ru.practicum.statistics.client.StatsClient;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class EventServiceImpl implements EventService {
 
     private EventRepository repository;
@@ -37,6 +42,8 @@ public class EventServiceImpl implements EventService {
     private StatsClient statsClient;
     private UserService userService;
     private CategoryService categoryService;
+
+    private static final String APP_NAME = "ewm-service";
 
     @Override
     public List<EventFullDto> getAdminEvents(List<Long> users, List<EventState> states, List<Long> categories,
@@ -193,12 +200,62 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public List<EventShortDto> getPublicEvents(String text, List<Long> categories, Boolean paid, LocalDateTime rangeStart, LocalDateTime rangeEnd, Boolean onlyAvailable, String sort, int from, int size) {
-        return List.of();
+        log.info("Getting public events with filters: text={}, categories={}, paid={}, rangeStart={}, rangeEnd={}, " +
+                        "onlyAvailable={}, sort={}, from={}, size={}",
+                text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size);
+
+        if (rangeStart == null) {
+            rangeStart = LocalDateTime.now();
+        }
+
+        Pageable pageable;
+        if (sort != null && sort.equalsIgnoreCase(SortType.VIEWS.name())) {
+            pageable = PageRequest.of(from / size, size);
+        } else {
+            pageable = PageRequest.of(from / size, size, Sort.by("eventDate").ascending());
+        }
+
+        Page<Event> page = repository.findPublishedEvents(text, categories, paid, rangeStart, rangeEnd, pageable);
+        List<Event> events = page.getContent();
+
+        if (onlyAvailable != null && onlyAvailable) {
+            events = events.stream()
+                    .filter(this::isEventAvailable)
+                    .collect(Collectors.toList());
+        }
+
+        if (sort != null && sort.equalsIgnoreCase(SortType.VIEWS.name())) {
+            events.sort(Comparator.comparingLong(this::getViewsCount));
+        }
+
+        List<EventShortDto> dtos = events.stream()
+                .map(mapper::toShortDto)
+                .collect(Collectors.toList());
+
+        List<Event> finalEvents = events;
+        dtos.forEach(dto -> {
+            Event event = finalEvents.get(dtos.indexOf(dto));
+            enrichShortDtoWithViewsAndRequests(dto, event);
+        });
+
+        statsClient.sendHit(new EndpointHit(APP_NAME, "/events", "0.0.0.0", LocalDateTime.now()));
+
+        return dtos;
     }
 
     @Override
     public EventFullDto getPublicEvent(Long eventId) {
-        return null;
+        log.info("Getting public event: eventId={}", eventId);
+
+        Event event = getEventEntity(eventId);
+
+        if (event.getState() != EventState.PUBLISHED) {
+            throw new NotFoundException("Event with id " + eventId + " not found");
+        }
+
+        statsClient.sendHit(new EndpointHit(APP_NAME, "/events/" + eventId, "0.0.0.0", LocalDateTime.now()));
+
+        return enrichWithViewsAndRequests(event);
     }
 
     @Override
@@ -225,6 +282,11 @@ public class EventServiceImpl implements EventService {
         dto.setConfirmedRequests(getConfirmedRequestsCount(event));
         dto.setViews(getViewsCount(event));
         return dto;
+    }
+
+    private void enrichShortDtoWithViewsAndRequests(EventShortDto dto, Event event) {
+        dto.setConfirmedRequests(getConfirmedRequestsCount(event));
+        dto.setViews(getViewsCount(event));
     }
 
     private long getConfirmedRequestsCount(Event event) {
@@ -254,5 +316,12 @@ public class EventServiceImpl implements EventService {
 
     private Category getCategoryEntity(Long categoryId) {
         return categoryService.getCategoryEntity(categoryId);
+    }
+
+    private boolean isEventAvailable(Event event) {
+        if (event.getParticipantLimit() == 0) {
+            return true;
+        }
+        return getConfirmedRequestsCount(event) < event.getParticipantLimit();
     }
 }

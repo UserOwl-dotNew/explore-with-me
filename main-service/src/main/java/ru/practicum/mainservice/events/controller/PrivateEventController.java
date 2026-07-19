@@ -45,7 +45,7 @@ public class PrivateEventController {
      *
      * @param userId Id пользователя
      * @param dto    Сущность нового события
-     * @return Полное описание события
+     * @return Полная информация о событии
      */
     @PostMapping
     public EventFullDto createEvent(
@@ -62,7 +62,7 @@ public class PrivateEventController {
      *
      * @param userId  Id пользователя
      * @param eventId Id события
-     * @return Полное описание события
+     * @return Полная информация о событии
      */
     @GetMapping("/{eventId}")
     public EventFullDto getEvent(
@@ -80,7 +80,7 @@ public class PrivateEventController {
      * @param userId  Id пользователя
      * @param eventId Id события
      * @param request Запрос с измененными данными для события
-     * @return Полное описание события
+     * @return Полная информация о событии
      */
     @PatchMapping("/{eventId}")
     public EventFullDto updateEvent(
