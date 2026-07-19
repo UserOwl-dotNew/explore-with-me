@@ -251,8 +251,8 @@ public class EventServiceImplTest {
         when(eventRepository.findById(1L)).thenReturn(Optional.of(event));
 
         assertThatThrownBy(() -> eventService.updateAdminEvent(1L, updateRequest))
-                .isInstanceOf(ConflictException.class).
-                hasMessageContaining("Cannot publish the event because it's not in PENDING state");
+                .isInstanceOf(ConflictException.class)
+                .hasMessageContaining("Cannot publish the event because it's not in PENDING state");
     }
 
     @Test
