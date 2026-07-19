@@ -18,13 +18,13 @@ public interface EventService {
      * В случае, если по заданным фильтрам не найдено ни одного события, возвращает пустой список.
      * </p>
      *
-     * @param users       список id пользователей, чьи события нужно найти (необязательный)
-     * @param states      список состояний, в которых находятся искомые события (необязательный)
-     * @param categories  список id категорий, в которых будет вестись поиск (необязательный)
-     * @param rangeStart  дата и время, не раньше которых должно произойти событие (необязательный)
-     * @param rangeEnd    дата и время, не позже которых должно произойти событие (необязательный)
-     * @param from        количество событий, которые нужно пропустить для формирования текущего набора (по умолчанию 0)
-     * @param size        количество событий в наборе (по умолчанию 10)
+     * @param users      список id пользователей, чьи события нужно найти (необязательный)
+     * @param states     список состояний, в которых находятся искомые события (необязательный)
+     * @param categories список id категорий, в которых будет вестись поиск (необязательный)
+     * @param rangeStart дата и время, не раньше которых должно произойти событие (необязательный)
+     * @param rangeEnd   дата и время, не позже которых должно произойти событие (необязательный)
+     * @param from       количество событий, которые нужно пропустить для формирования текущего набора (по умолчанию 0)
+     * @param size       количество событий в наборе (по умолчанию 10)
      * @return список событий с полной информацией
      */
     List<EventFullDto> getAdminEvents(List<Long> users, List<EventState> states,
@@ -78,9 +78,9 @@ public interface EventService {
      * @param userId id текущего пользователя
      * @param dto    данные добавляемого события
      * @return созданное событие с полной информацией (статус PENDING)
-     * @throws ru.practicum.common.exception.BadRequestException   если запрос составлен некорректно
-     * @throws ru.practicum.common.exception.ConflictException     если событие не удовлетворяет правилам создания
-     * @throws ru.practicum.common.exception.NotFoundException     если категория не найдена
+     * @throws ru.practicum.common.exception.BadRequestException если запрос составлен некорректно
+     * @throws ru.practicum.common.exception.ConflictException   если событие не удовлетворяет правилам создания
+     * @throws ru.practicum.common.exception.NotFoundException   если категория не найдена
      */
     EventFullDto createEvent(Long userId, NewEventDto dto);
 
@@ -113,9 +113,9 @@ public interface EventService {
      * @param eventId id редактируемого события
      * @param request новые данные события
      * @return обновленное событие с полной информацией
-     * @throws ru.practicum.common.exception.NotFoundException     если событие не найдено или не принадлежит пользователю
-     * @throws ru.practicum.common.exception.ConflictException     если событие не удовлетворяет правилам редактирования
-     * @throws ru.practicum.common.exception.BadRequestException   если запрос составлен некорректно
+     * @throws ru.practicum.common.exception.NotFoundException   если событие не найдено или не принадлежит пользователю
+     * @throws ru.practicum.common.exception.ConflictException   если событие не удовлетворяет правилам редактирования
+     * @throws ru.practicum.common.exception.BadRequestException если запрос составлен некорректно
      */
     EventFullDto updateUserEvent(Long userId, Long eventId, UpdateEventUserRequest request);
 
@@ -173,7 +173,7 @@ public interface EventService {
      *
      * @param eventId id события
      * @return полная информация о событии с просмотрами и количеством подтвержденных заявок
-     * @throws ru.practicum.common.exception.NotFoundException если событие не найдено или не опубликовано
+     * @throws ru.practicum.common.exception.NotFoundException   если событие не найдено или не опубликовано
      * @throws ru.practicum.common.exception.BadRequestException если запрос составлен некорректно
      */
     EventFullDto getPublicEvent(Long eventId);

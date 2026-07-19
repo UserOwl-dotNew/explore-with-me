@@ -27,7 +27,8 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(AdminEventController.class)
 public class AdminEventControllerTest {
@@ -115,9 +116,9 @@ public class AdminEventControllerTest {
         )).thenReturn(events);
 
         mvc.perform(get("/admin/events")
-                .param("from", "0")
-                .param("size", "10")
-                .contentType(MediaType.APPLICATION_JSON))
+                        .param("from", "0")
+                        .param("size", "10")
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(1L))
                 .andExpect(jsonPath("$[0].annotation").value("Тестовое событие"))
