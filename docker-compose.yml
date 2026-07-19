@@ -56,6 +56,12 @@ services:
       SPRING_DATASOURCE_URL: "jdbc:postgresql://ewm-db:5433/ewm"
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
 
 volumes:
   stats-db-data:
