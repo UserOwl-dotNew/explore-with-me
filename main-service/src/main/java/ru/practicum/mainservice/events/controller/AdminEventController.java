@@ -22,6 +22,7 @@ import static ru.practicum.common.config.JacksonConfig.DATE_TIME_FORMAT;
 @RequestMapping("/admin/events")
 public class AdminEventController {
 
+    // todo: добавить JavaDocs
     private final EventService service;
 
     @GetMapping
