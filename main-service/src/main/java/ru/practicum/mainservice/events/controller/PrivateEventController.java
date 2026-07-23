@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.mainservice.events.dto.EventFullDto;
-import ru.practicum.mainservice.events.dto.EventShortDto;
+import ru.practicum.common.dto.EventShortDto;
 import ru.practicum.mainservice.events.dto.NewEventDto;
 import ru.practicum.mainservice.events.dto.UpdateEventUserRequest;
 import ru.practicum.mainservice.events.service.EventService;

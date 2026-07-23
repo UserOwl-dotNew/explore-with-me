@@ -363,7 +363,7 @@ public class EventServiceImplTest {
         when(eventMapper.toShortDto(any(Event.class)))
                 .thenReturn(createEventShortDto(event));
 
-        List<EventShortDto> result = eventService.getUserEvents(userId, 0, 10);
+        List<ru.practicum.common.dto.EventShortDto> result = eventService.getUserEvents(userId, 0, 10);
 
         assertThat(result).hasSize(1);
         assertThat(result.get(0).getId()).isEqualTo(1L);
@@ -378,7 +378,7 @@ public class EventServiceImplTest {
         when(eventRepository.findByInitiatorId(eq(userId), any(PageRequest.class)))
                 .thenReturn(emptyPage);
 
-        List<EventShortDto> result = eventService.getUserEvents(userId, 0, 10);
+        List<ru.practicum.common.dto.EventShortDto> result = eventService.getUserEvents(userId, 0, 10);
 
         assertThat(result).isEmpty();
         verify(eventRepository).findByInitiatorId(eq(userId), any(PageRequest.class));
@@ -624,7 +624,7 @@ public class EventServiceImplTest {
         )).thenReturn(eventPage);
         when(eventMapper.toShortDto(event)).thenReturn(createEventShortDto(event));
 
-        List<EventShortDto> result = eventService.getPublicEvents(
+        List<ru.practicum.common.dto.EventShortDto> result = eventService.getPublicEvents(
                 null, null, null, null, null, false, null, 0, 10
         );
 
@@ -766,8 +766,8 @@ public class EventServiceImplTest {
                 .hasMessageContaining("Event with id 999 was not found");
     }
 
-    private EventShortDto createEventShortDto(Event event) {
-        EventShortDto dto = new EventShortDto();
+    private ru.practicum.common.dto.EventShortDto createEventShortDto(Event event) {
+        ru.practicum.common.dto.EventShortDto dto = new ru.practicum.common.dto.EventShortDto();
         dto.setId(event.getId());
         dto.setAnnotation(event.getAnnotation());
         dto.setTitle(event.getTitle());

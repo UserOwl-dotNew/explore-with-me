@@ -13,7 +13,7 @@ public interface EventMapper {
 
     EventFullDto toFullDto(Event event);
 
-    EventShortDto toShortDto(Event event);
+    ru.practicum.common.dto.EventShortDto toShortDto(Event event);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "state", constant = "PENDING")

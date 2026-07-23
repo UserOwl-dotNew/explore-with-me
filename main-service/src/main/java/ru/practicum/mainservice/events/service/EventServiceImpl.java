@@ -37,11 +37,11 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class EventServiceImpl implements EventService {
 
-    private EventRepository repository;
-    private EventMapper mapper;
-    private StatsClient statsClient;
-    private UserService userService;
-    private CategoryService categoryService;
+    private final EventRepository repository;
+    private final EventMapper mapper;
+    private final StatsClient statsClient;
+    private final UserService userService;
+    private final CategoryService categoryService;
 
     private static final String APP_NAME = "ewm-service";
 
@@ -103,7 +103,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public List<EventShortDto> getUserEvents(Long userId, int from, int size) {
+    public List<ru.practicum.common.dto.EventShortDto> getUserEvents(Long userId, int from, int size) {
         log.info("Getting events for user: userId={}", userId);
 
         getUserEntity(userId);
@@ -199,7 +199,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public List<EventShortDto> getPublicEvents(String text, List<Long> categories, Boolean paid, LocalDateTime rangeStart, LocalDateTime rangeEnd, Boolean onlyAvailable, String sort, int from, int size) {
+    public List<ru.practicum.common.dto.EventShortDto> getPublicEvents(String text, List<Long> categories, Boolean paid, LocalDateTime rangeStart, LocalDateTime rangeEnd, Boolean onlyAvailable, String sort, int from, int size) {
         log.info("Getting public events with filters: text={}, categories={}, paid={}, rangeStart={}, rangeEnd={}, " +
                         "onlyAvailable={}, sort={}, from={}, size={}",
                 text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size);
@@ -228,7 +228,7 @@ public class EventServiceImpl implements EventService {
             events.sort(Comparator.comparingLong(this::getViewsCount));
         }
 
-        List<EventShortDto> dtos = events.stream()
+        List<ru.practicum.common.dto.EventShortDto> dtos = events.stream()
                 .map(mapper::toShortDto)
                 .collect(Collectors.toList());
 
@@ -284,7 +284,7 @@ public class EventServiceImpl implements EventService {
         return dto;
     }
 
-    private void enrichShortDtoWithViewsAndRequests(EventShortDto dto, Event event) {
+    private void enrichShortDtoWithViewsAndRequests(ru.practicum.common.dto.EventShortDto dto, Event event) {
         dto.setConfirmedRequests(getConfirmedRequestsCount(event));
         dto.setViews(getViewsCount(event));
     }

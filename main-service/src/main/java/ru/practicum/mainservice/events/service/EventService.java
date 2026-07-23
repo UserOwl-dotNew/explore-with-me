@@ -65,7 +65,7 @@ public interface EventService {
      * @param size   количество элементов в наборе (по умолчанию 10)
      * @return список событий с краткой информацией
      */
-    List<EventShortDto> getUserEvents(Long userId, int from, int size);
+    List<ru.practicum.common.dto.EventShortDto> getUserEvents(Long userId, int from, int size);
 
     /**
      * Private: Добавление нового события
@@ -151,10 +151,10 @@ public interface EventService {
      * @return список событий с краткой информацией, включая количество просмотров и подтвержденных заявок
      * @throws ru.practicum.common.exception.BadRequestException если запрос составлен некорректно
      */
-    List<EventShortDto> getPublicEvents(String text, List<Long> categories,
-                                        Boolean paid, LocalDateTime rangeStart,
-                                        LocalDateTime rangeEnd, Boolean onlyAvailable,
-                                        String sort, int from, int size);
+    List<ru.practicum.common.dto.EventShortDto> getPublicEvents(String text, List<Long> categories,
+                                                                Boolean paid, LocalDateTime rangeStart,
+                                                                LocalDateTime rangeEnd, Boolean onlyAvailable,
+                                                                String sort, int from, int size);
 
     /**
      * Public: Получение подробной информации об опубликованном событии по его идентификатору
