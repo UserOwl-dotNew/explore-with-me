@@ -12,7 +12,8 @@ import lombok.NoArgsConstructor;
 @Table(name = "categories")
 public class Category {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "entity_seq")
+    @SequenceGenerator(name = "entity_seq", sequenceName = "entity_seq", allocationSize = 1)
     private Long id;
 
     @Column(name = "name", nullable = false, unique = true, length = 50)
