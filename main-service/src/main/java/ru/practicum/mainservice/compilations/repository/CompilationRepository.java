@@ -11,8 +11,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
-public interface CompilationRepository
-        extends JpaRepository<Compilation, Long> {
+public interface CompilationRepository extends JpaRepository<Compilation, Long> {
 
     @Query("""
             SELECT c.id

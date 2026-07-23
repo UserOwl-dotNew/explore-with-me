@@ -88,16 +88,15 @@ class AdminCompilationControllerTest {
     @Test
     void saveCompilation_shouldReturnBadRequest_whenTitleIsMissing()
             throws Exception {
-        String request = """
-                {
-                  "events": [],
-                  "pinned": false
-                }
-                """;
+        NewCompilationDto request = new NewCompilationDto(
+                Set.of(),
+                false,
+                null
+        );
 
         mockMvc.perform(post("/admin/compilations")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(request))
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
     }
 
