@@ -18,17 +18,16 @@ import java.time.LocalDateTime;
 @Table(name = "events")
 public class Event {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "entity_seq")
-    @SequenceGenerator(name = "entity_seq", sequenceName = "entity_seq", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "annotation", nullable = false, length = 2000)
+    @Column(name = "annotation", nullable = false, length = 2000, columnDefinition = "TEXT")
     private String annotation;
 
-    @Column(name = "description", nullable = false, length = 7000)
+    @Column(name = "description", nullable = false, length = 7000, columnDefinition = "TEXT")
     private String description;
 
-    @Column(name = "title", nullable = false, length = 120)
+    @Column(name = "title", nullable = false, length = 120, columnDefinition = "VARCHAR(120)")
     private String title;
 
     @ManyToOne(fetch = FetchType.LAZY)

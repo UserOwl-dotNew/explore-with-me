@@ -27,6 +27,7 @@ import ru.practicum.mainservice.users.service.UserService;
 import ru.practicum.statistics.client.StatsClient;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -37,13 +38,15 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class EventServiceImpl implements EventService {
 
-    private EventRepository repository;
-    private EventMapper mapper;
-    private StatsClient statsClient;
-    private UserService userService;
-    private CategoryService categoryService;
+    private final EventRepository repository;
+    private final EventMapper mapper;
+    private final StatsClient statsClient;
+    private final UserService userService;
+    private final CategoryService categoryService;
 
     private static final String APP_NAME = "ewm-service";
+    private static final DateTimeFormatter FORMATTER =
+            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     @Override
     public List<EventFullDto> getAdminEvents(List<Long> users, List<EventState> states, List<Long> categories,
@@ -208,6 +211,18 @@ public class EventServiceImpl implements EventService {
             rangeStart = LocalDateTime.now();
         }
 
+        if (rangeEnd == null) {
+            rangeEnd = LocalDateTime.now().plusYears(100);
+        }
+
+        if (text == null) {
+            text = "";
+        }
+
+        if (paid == null) {
+            paid = false;
+        }
+
         Pageable pageable;
         if (sort != null && sort.equalsIgnoreCase(SortType.VIEWS.name())) {
             pageable = PageRequest.of(from / size, size);
@@ -253,7 +268,11 @@ public class EventServiceImpl implements EventService {
             throw new NotFoundException("Event with id " + eventId + " not found");
         }
 
-        statsClient.sendHit(new EndpointHit(APP_NAME, "/events/" + eventId, "0.0.0.0", LocalDateTime.now()));
+        statsClient.sendHit(new EndpointHit(
+                APP_NAME,
+                "/events/" + eventId,
+                "0.0.0.0",
+                LocalDateTime.now()));
 
         return enrichWithViewsAndRequests(event);
     }
@@ -296,9 +315,12 @@ public class EventServiceImpl implements EventService {
 
     private long getViewsCount(Event event) {
         try {
+            LocalDateTime start = event.getPublishedOn() != null
+                    ? event.getPublishedOn()
+                    : event.getCreatedOn();
             List<ViewStats> stats = statsClient.getStats(
-                    String.valueOf(event.getPublishedOn() != null ? event.getPublishedOn() : event.getCreatedOn()),
-                    String.valueOf(LocalDateTime.now()),
+                    start.format(FORMATTER),
+                    LocalDateTime.now().format(FORMATTER),
                     List.of("/events/" + event.getId()),
                     true
             );
