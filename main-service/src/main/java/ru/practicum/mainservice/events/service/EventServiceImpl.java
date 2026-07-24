@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.common.dto.EventShortDto;
 import ru.practicum.common.entity.Category;
 import ru.practicum.common.entity.User;
 import ru.practicum.common.enums.AdminStateAction;
@@ -37,11 +38,11 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class EventServiceImpl implements EventService {
 
-    private EventRepository repository;
-    private EventMapper mapper;
-    private StatsClient statsClient;
-    private UserService userService;
-    private CategoryService categoryService;
+    private final EventRepository repository;
+    private final EventMapper mapper;
+    private final StatsClient statsClient;
+    private final UserService userService;
+    private final CategoryService categoryService;
 
     private static final String APP_NAME = "ewm-service";
 

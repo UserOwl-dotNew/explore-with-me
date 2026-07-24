@@ -1,11 +1,13 @@
 package ru.practicum.common.exception;
 
 import lombok.extern.slf4j.Slf4j;
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -107,5 +109,30 @@ public class ErrorHandler {
                 HttpStatus.INTERNAL_SERVER_ERROR.name(),
                 LocalDateTime.now().format(FORMATTER)
         );
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiError handleMethodArgumentTypeMismatch(
+            MethodArgumentTypeMismatchException exception
+    ) {
+        return new ApiError(
+                List.of(exception.getMessage()),
+                "Failed to convert parameter '" + exception.getName() + "' with value '" + exception.getValue(),
+                "Incorrectly made request.",
+                HttpStatus.BAD_REQUEST.name(),
+                LocalDateTime.now().format(FORMATTER));
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiError handleConstraintViolation(
+            ConstraintViolationException e
+    ) {
+        return new ApiError(List.of(e.getMessage()),
+                "Validation failed",
+                "Incorrectly made request.",
+                HttpStatus.BAD_REQUEST.name(),
+                LocalDateTime.now().format(FORMATTER));
     }
 }

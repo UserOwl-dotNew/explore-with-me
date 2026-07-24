@@ -3,6 +3,7 @@ package ru.practicum.mainservice.events.mapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+import ru.practicum.common.dto.EventShortDto;
 import ru.practicum.common.entity.Category;
 import ru.practicum.common.entity.User;
 import ru.practicum.mainservice.events.dto.*;

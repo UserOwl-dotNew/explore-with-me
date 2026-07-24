@@ -1,5 +1,6 @@
 package ru.practicum.mainservice.events.service;
 
+import ru.practicum.common.dto.EventShortDto;
 import ru.practicum.common.enums.EventState;
 import ru.practicum.mainservice.events.dto.*;
 import ru.practicum.mainservice.events.entity.Event;
