@@ -1,5 +1,6 @@
 package ru.practicum.mainservice.events.service;
 
+import ru.practicum.common.dto.EventShortDto;
 import ru.practicum.common.enums.EventState;
 import ru.practicum.mainservice.events.dto.*;
 import ru.practicum.mainservice.events.entity.Event;
@@ -65,7 +66,7 @@ public interface EventService {
      * @param size   количество элементов в наборе (по умолчанию 10)
      * @return список событий с краткой информацией
      */
-    List<ru.practicum.common.dto.EventShortDto> getUserEvents(Long userId, int from, int size);
+    List<EventShortDto> getUserEvents(Long userId, int from, int size);
 
     /**
      * Private: Добавление нового события
@@ -151,10 +152,10 @@ public interface EventService {
      * @return список событий с краткой информацией, включая количество просмотров и подтвержденных заявок
      * @throws ru.practicum.common.exception.BadRequestException если запрос составлен некорректно
      */
-    List<ru.practicum.common.dto.EventShortDto> getPublicEvents(String text, List<Long> categories,
-                                                                Boolean paid, LocalDateTime rangeStart,
-                                                                LocalDateTime rangeEnd, Boolean onlyAvailable,
-                                                                String sort, int from, int size);
+    List<EventShortDto> getPublicEvents(String text, List<Long> categories,
+                                        Boolean paid, LocalDateTime rangeStart,
+                                        LocalDateTime rangeEnd, Boolean onlyAvailable,
+                                        String sort, int from, int size);
 
     /**
      * Public: Получение подробной информации об опубликованном событии по его идентификатору

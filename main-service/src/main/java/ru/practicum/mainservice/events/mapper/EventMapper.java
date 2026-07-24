@@ -3,6 +3,7 @@ package ru.practicum.mainservice.events.mapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+import ru.practicum.common.dto.EventShortDto;
 import ru.practicum.common.entity.Category;
 import ru.practicum.common.entity.User;
 import ru.practicum.mainservice.events.dto.*;
@@ -13,7 +14,7 @@ public interface EventMapper {
 
     EventFullDto toFullDto(Event event);
 
-    ru.practicum.common.dto.EventShortDto toShortDto(Event event);
+    EventShortDto toShortDto(Event event);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "state", constant = "PENDING")

@@ -20,7 +20,7 @@ public class CompilationMapper {
     public Compilation toEntity(NewCompilationDto dto, Set<Event> events) {
         Compilation compilation = new Compilation();
         compilation.setTitle(dto.getTitle());
-        compilation.setPinned(Boolean.TRUE.equals(dto.getPinned()));
+        compilation.setPinned(dto.getPinned());
         compilation.setEvents(events == null ? new LinkedHashSet<>() : new LinkedHashSet<>(events));
         return compilation;
     }

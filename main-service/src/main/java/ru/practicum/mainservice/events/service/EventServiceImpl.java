@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.common.dto.EventShortDto;
 import ru.practicum.common.entity.Category;
 import ru.practicum.common.entity.User;
 import ru.practicum.common.enums.AdminStateAction;
@@ -103,7 +104,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public List<ru.practicum.common.dto.EventShortDto> getUserEvents(Long userId, int from, int size) {
+    public List<EventShortDto> getUserEvents(Long userId, int from, int size) {
         log.info("Getting events for user: userId={}", userId);
 
         getUserEntity(userId);
@@ -199,7 +200,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public List<ru.practicum.common.dto.EventShortDto> getPublicEvents(String text, List<Long> categories, Boolean paid, LocalDateTime rangeStart, LocalDateTime rangeEnd, Boolean onlyAvailable, String sort, int from, int size) {
+    public List<EventShortDto> getPublicEvents(String text, List<Long> categories, Boolean paid, LocalDateTime rangeStart, LocalDateTime rangeEnd, Boolean onlyAvailable, String sort, int from, int size) {
         log.info("Getting public events with filters: text={}, categories={}, paid={}, rangeStart={}, rangeEnd={}, " +
                         "onlyAvailable={}, sort={}, from={}, size={}",
                 text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size);
@@ -228,7 +229,7 @@ public class EventServiceImpl implements EventService {
             events.sort(Comparator.comparingLong(this::getViewsCount));
         }
 
-        List<ru.practicum.common.dto.EventShortDto> dtos = events.stream()
+        List<EventShortDto> dtos = events.stream()
                 .map(mapper::toShortDto)
                 .collect(Collectors.toList());
 
@@ -284,7 +285,7 @@ public class EventServiceImpl implements EventService {
         return dto;
     }
 
-    private void enrichShortDtoWithViewsAndRequests(ru.practicum.common.dto.EventShortDto dto, Event event) {
+    private void enrichShortDtoWithViewsAndRequests(EventShortDto dto, Event event) {
         dto.setConfirmedRequests(getConfirmedRequestsCount(event));
         dto.setViews(getViewsCount(event));
     }
