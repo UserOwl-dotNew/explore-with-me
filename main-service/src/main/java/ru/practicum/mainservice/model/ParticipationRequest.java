@@ -4,9 +4,9 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.practicum.mainservice.model.Event;
 import ru.practicum.common.entity.User;
 import ru.practicum.common.enums.RequestStatus;
+import ru.practicum.mainservice.events.entity.Event;
 
 import java.time.LocalDateTime;
 

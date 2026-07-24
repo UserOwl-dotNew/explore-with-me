@@ -4,9 +4,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.common.exception.NotFoundException;
-import ru.practicum.mainservice.model.Event;
 import ru.practicum.mainservice.repository.EventRepository;
 import ru.practicum.mainservice.service.EventService;
+import ru.practicum.mainservice.events.entity.Event;
 
 @Service
 @RequiredArgsConstructor

@@ -24,11 +24,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
 @ActiveProfiles("test")
-@EntityScan(basePackages = {"ru.practicum.common.entity", "ru.practicum.mainservice.events.entity"})
-@TestPropertySource(properties = {
-        "spring.jpa.database-platform=org.hibernate.dialect.H2Dialect",
-        "spring.datasource.url=jdbc:h2:mem:testdb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=false"
-})
 public class EventRepositoryTest {
 
     @Autowired

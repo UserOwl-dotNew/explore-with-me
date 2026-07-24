@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.mainservice.model.Event;
 import ru.practicum.common.entity.User;
 import ru.practicum.common.enums.EventState;
 import ru.practicum.common.enums.RequestStatus;
@@ -17,6 +16,7 @@ import ru.practicum.mainservice.model.ParticipationRequest;
 import ru.practicum.mainservice.repository.ParticipationRequestRepository;
 import ru.practicum.mainservice.service.EventService;
 import ru.practicum.mainservice.service.ParticipationRequestService;
+import ru.practicum.mainservice.events.entity.Event;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
