@@ -83,6 +83,10 @@ public class CompilationServiceImpl implements CompilationService {
                         "Compilation with id=" + compId + " was not found"
                 ));
 
+        if (dto == null) {
+            return compilationMapper.toDto(compilation);
+        }
+
         if (dto.getTitle() != null) {
             compilation.setTitle(dto.getTitle());
         }
