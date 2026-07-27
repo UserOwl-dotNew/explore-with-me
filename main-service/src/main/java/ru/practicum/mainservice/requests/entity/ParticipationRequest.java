@@ -1,4 +1,4 @@
-package ru.practicum.mainservice.model;
+package ru.practicum.mainservice.requests.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

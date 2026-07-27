@@ -1,4 +1,4 @@
-package ru.practicum.mainservice.service.impl;
+package ru.practicum.mainservice.requests.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -9,13 +9,13 @@ import ru.practicum.common.enums.EventState;
 import ru.practicum.common.enums.RequestStatus;
 import ru.practicum.common.exception.ConflictException;
 import ru.practicum.common.exception.NotFoundException;
-import ru.practicum.mainservice.dto.EventRequestStatusUpdateRequest;
-import ru.practicum.mainservice.dto.EventRequestStatusUpdateResult;
-import ru.practicum.mainservice.dto.ParticipationRequestDto;
-import ru.practicum.mainservice.model.ParticipationRequest;
-import ru.practicum.mainservice.repository.ParticipationRequestRepository;
+import ru.practicum.mainservice.requests.dto.EventRequestStatusUpdateRequest;
+import ru.practicum.mainservice.requests.dto.EventRequestStatusUpdateResult;
+import ru.practicum.mainservice.requests.dto.ParticipationRequestDto;
+import ru.practicum.mainservice.requests.entity.ParticipationRequest;
+import ru.practicum.mainservice.requests.repository.ParticipationRequestRepository;
 import ru.practicum.mainservice.service.EventService;
-import ru.practicum.mainservice.service.ParticipationRequestService;
+import ru.practicum.mainservice.requests.service.ParticipationRequestService;
 import ru.practicum.mainservice.events.entity.Event;
 
 import java.time.LocalDateTime;
