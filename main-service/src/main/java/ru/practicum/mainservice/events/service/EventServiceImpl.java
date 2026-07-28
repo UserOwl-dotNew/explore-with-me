@@ -29,10 +29,7 @@ import ru.practicum.mainservice.users.service.UserService;
 import ru.practicum.statistics.client.StatsClient;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -113,6 +110,13 @@ public class EventServiceImpl implements EventService {
 
         Event event = getEventEntity(eventId);
 
+        if (request.getEventDate() != null
+                && !request.getEventDate().isAfter(LocalDateTime.now())) {
+            throw new BadRequestException(
+                    "Event date must be in the future"
+            );
+        }
+
         if (request.getStateAction() == AdminStateAction.PUBLISH_EVENT) {
             if (event.getState() != EventState.PENDING) {
                 throw new ConflictException("Cannot publish the event because it's not in PENDING state");
@@ -134,8 +138,6 @@ public class EventServiceImpl implements EventService {
         if (request.getCategory() != null) {
             category = getCategoryEntity(request.getCategory());
         }
-
-        mapper.updateFromAdmin(request, category, event);
 
         if (request.getStateAction() != null) {
             switch (request.getStateAction()) {
@@ -178,6 +180,10 @@ public class EventServiceImpl implements EventService {
 
         if (dto.getEventDate().isBefore(LocalDateTime.now().plusHours(2))) {
             throw new BadRequestException("Event date must be at least 2 hours from now");
+        }
+
+        if (dto.getParticipantLimit() < 0) {
+            throw new BadRequestException("Participant limit must be positive");
         }
 
         Event event = mapper.toEntity(dto, category, user);
@@ -225,6 +231,15 @@ public class EventServiceImpl implements EventService {
         if (request.getEventDate() != null &&
                 request.getEventDate().isBefore(LocalDateTime.now().plusHours(2))) {
             throw new BadRequestException("Event date must be at least 2 hours from now");
+        }
+
+        if (request.getEventDate() != null &&
+                request.getEventDate().toLocalDate().equals(LocalDateTime.now().toLocalDate())) {
+            throw new BadRequestException("Event date must not be now");
+        }
+
+        if (request.getParticipantLimit() != null && request.getParticipantLimit() < 0) {
+            throw new BadRequestException("Participant limit must be positive");
         }
 
         Category category = null;
