@@ -66,7 +66,7 @@ public class PrivateEventControllerTest {
         mockMvc.perform(post("/users/{userId}/events", userId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(1L))
                 .andExpect(jsonPath("$.annotation").value("Test annotation need more simbols"));
     }

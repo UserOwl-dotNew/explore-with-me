@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.common.dto.EventShortDto;
@@ -28,8 +29,10 @@ import ru.practicum.mainservice.users.service.UserService;
 import ru.practicum.statistics.client.StatsClient;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 @Service
@@ -47,10 +50,57 @@ public class EventServiceImpl implements EventService {
     private static final String APP_NAME = "ewm-service";
 
     @Override
-    public List<EventFullDto> getAdminEvents(List<Long> users, List<EventState> states, List<Long> categories,
-                                             LocalDateTime rangeStart, LocalDateTime rangeEnd, int from, int size) {
-        Pageable pagebale = PageRequest.of(from / size, size);
-        Page<Event> page = repository.findAllByAdminFilters(users, states, categories, rangeStart, rangeEnd, pagebale);
+    public List<EventFullDto> getAdminEvents(
+            List<Long> users,
+            List<EventState> states,
+            List<Long> categories,
+            LocalDateTime rangeStart,
+            LocalDateTime rangeEnd,
+            int from,
+            int size
+    ) {
+        Pageable pageable = PageRequest.of(from / size, size);
+
+        Specification<Event> specification = Specification.where(null);
+
+        if (users != null && !users.isEmpty()) {
+            specification = specification.and(
+                    (root, query, criteriaBuilder) ->
+                            root.get("initiator").get("id").in(users));
+        }
+
+        if (states != null && !states.isEmpty()) {
+            specification = specification.and(
+                    (root, query, criteriaBuilder) ->
+                            root.get("state").in(states));
+        }
+
+        if (categories != null && !categories.isEmpty()) {
+            specification = specification.and(
+                    (root, query, criteriaBuilder) ->
+                            root.get("category").get("id").in(categories)
+            );
+        }
+
+        if (rangeStart != null) {
+            specification = specification.and(
+                    (root, query, criteriaBuilder) ->
+                            criteriaBuilder.greaterThanOrEqualTo(
+                                    root.get("eventDate"), rangeStart));
+        }
+
+        if (rangeEnd != null) {
+            specification = specification.and(
+                    (root, query, criteriaBuilder) ->
+                            criteriaBuilder.lessThanOrEqualTo(
+                                    root.get("eventDate"), rangeEnd));
+        }
+
+        Page<Event> page = repository.findAll(
+                specification,
+                pageable
+        );
+
         return page.getContent().stream()
                 .map(this::enrichWithViewsAndRequests)
                 .collect(Collectors.toList());
@@ -91,7 +141,7 @@ public class EventServiceImpl implements EventService {
             switch (request.getStateAction()) {
                 case PUBLISH_EVENT:
                     event.setState(EventState.PUBLISHED);
-                    event.setEventDate(LocalDateTime.now());
+                    event.setPublishedOn(LocalDateTime.now());
                     break;
                 case REJECT_EVENT:
                     event.setState(EventState.CANCELED);
@@ -200,48 +250,130 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
+    @Transactional
     public List<EventShortDto> getPublicEvents(String text, List<Long> categories, Boolean paid, LocalDateTime rangeStart, LocalDateTime rangeEnd, Boolean onlyAvailable, String sort, int from, int size) {
         log.info("Getting public events with filters: text={}, categories={}, paid={}, rangeStart={}, rangeEnd={}, " +
                         "onlyAvailable={}, sort={}, from={}, size={}",
                 text, categories, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size);
 
-        if (rangeStart == null) {
-            rangeStart = LocalDateTime.now();
+        LocalDateTime finalRangeStart = rangeStart == null ? LocalDateTime.now() : rangeStart;
+
+        if (rangeEnd != null && finalRangeStart.isAfter(rangeEnd)) {
+            throw new BadRequestException(
+                    "Range start must be before range end"
+            );
         }
 
         Pageable pageable;
-        if (sort != null && sort.equalsIgnoreCase(SortType.VIEWS.name())) {
-            pageable = PageRequest.of(from / size, size);
+
+        if (SortType.VIEWS.name().equalsIgnoreCase(sort)) {
+            pageable = PageRequest.of(
+                    from / size,
+                    size
+            );
         } else {
-            pageable = PageRequest.of(from / size, size, Sort.by("eventDate").ascending());
+            pageable = PageRequest.of(
+                    from / size,
+                    size,
+                    Sort.by("eventDate").ascending()
+            );
         }
 
-        Page<Event> page = repository.findPublishedEvents(text, categories, paid, rangeStart, rangeEnd, pageable);
-        List<Event> events = page.getContent();
+        Specification<Event> specification =
+                (root, query, criteriaBuilder) ->
+                        criteriaBuilder.equal(root.get("state"), EventState.PUBLISHED);
 
-        if (onlyAvailable != null && onlyAvailable) {
+        if (text != null && !text.isBlank()) {
+            String pattern = "%" + text.toLowerCase(Locale.ROOT) + "%";
+
+            specification = specification.and(
+                    (root, query, criteriaBuilder) ->
+                            criteriaBuilder.or(
+                                    criteriaBuilder.like(criteriaBuilder.lower(root.get("annotation")),
+                                            pattern
+                                    ),
+                                    criteriaBuilder.like(criteriaBuilder.lower(root.get("description")),
+                                            pattern
+                                    )
+                            )
+            );
+        }
+
+        if (categories != null && !categories.isEmpty()) {
+            specification = specification.and(
+                    (root, query, criteriaBuilder) ->
+                            root.get("category").get("id").in(categories)
+            );
+        }
+
+        if (paid != null) {
+            specification = specification.and(
+                    (root, query, criteriaBuilder) ->
+                            criteriaBuilder.equal(root.get("paid"), paid)
+            );
+        }
+
+        specification = specification.and(
+                (root, query, criteriaBuilder) ->
+                        criteriaBuilder.greaterThanOrEqualTo(root.get("eventDate"), finalRangeStart)
+        );
+
+        if (rangeEnd != null) {
+            specification = specification.and(
+                    (root, query, criteriaBuilder) ->
+                            criteriaBuilder.lessThanOrEqualTo(
+                                    root.get("eventDate"),
+                                    rangeEnd
+                            )
+            );
+        }
+
+        Page<Event> eventPage = repository.findAll(
+                specification,
+                pageable
+        );
+
+        List<Event> events = new ArrayList<>(
+                eventPage.getContent()
+        );
+
+        if (onlyAvailable) {
             events = events.stream()
                     .filter(this::isEventAvailable)
                     .collect(Collectors.toList());
         }
 
-        if (sort != null && sort.equalsIgnoreCase(SortType.VIEWS.name())) {
-            events.sort(Comparator.comparingLong(this::getViewsCount));
+        if (SortType.VIEWS.name().equalsIgnoreCase(sort)) {
+            events.sort(
+                    Comparator.comparingLong(
+                            this::getViewsCount
+                    ).reversed()
+            );
         }
 
-        List<EventShortDto> dtos = events.stream()
-                .map(mapper::toShortDto)
-                .collect(Collectors.toList());
+        List<EventShortDto> result = new ArrayList<>();
 
-        List<Event> finalEvents = events;
-        dtos.forEach(dto -> {
-            Event event = finalEvents.get(dtos.indexOf(dto));
-            enrichShortDtoWithViewsAndRequests(dto, event);
-        });
+        for (Event event : events) {
+            EventShortDto dto = mapper.toShortDto(event);
 
-        statsClient.sendHit(new EndpointHit(APP_NAME, "/events", "0.0.0.0", LocalDateTime.now()));
+            enrichShortDtoWithViewsAndRequests(
+                    dto,
+                    event
+            );
 
-        return dtos;
+            result.add(dto);
+        }
+
+        statsClient.sendHit(
+                new EndpointHit(
+                        APP_NAME,
+                        "/events",
+                        "0.0.0.0",
+                        LocalDateTime.now()
+                )
+        );
+
+        return result;
     }
 
     @Override
