@@ -139,6 +139,8 @@ public class EventServiceImpl implements EventService {
             category = getCategoryEntity(request.getCategory());
         }
 
+        mapper.updateFromAdmin(request, category, event);
+
         if (request.getStateAction() != null) {
             switch (request.getStateAction()) {
                 case PUBLISH_EVENT:
