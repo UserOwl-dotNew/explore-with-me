@@ -3,12 +3,10 @@ package ru.practicum.mainservice.events.repository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
 import ru.practicum.common.entity.Category;
 import ru.practicum.common.entity.Location;
 import ru.practicum.common.entity.User;
@@ -24,11 +22,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
 @ActiveProfiles("test")
-@EntityScan(basePackages = {"ru.practicum.common.entity", "ru.practicum.mainservice.events.entity"})
-@TestPropertySource(properties = {
-        "spring.jpa.database-platform=org.hibernate.dialect.H2Dialect",
-        "spring.datasource.url=jdbc:h2:mem:testdb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=false"
-})
 public class EventRepositoryTest {
 
     @Autowired
