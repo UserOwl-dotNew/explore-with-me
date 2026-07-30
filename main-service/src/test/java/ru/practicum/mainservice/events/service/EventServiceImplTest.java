@@ -33,7 +33,7 @@ import ru.practicum.mainservice.events.repository.EventRepository;
 import ru.practicum.mainservice.events.repository.EventRepositoryCustom;
 import ru.practicum.mainservice.requests.repository.ParticipationRequestRepository;
 import ru.practicum.mainservice.users.service.UserService;
-import ru.practicum.statistics.client.StatsClient;
+import ru.practicum.statistics.client.controller.StatsClient;
 
 import java.time.LocalDateTime;
 import java.util.List;

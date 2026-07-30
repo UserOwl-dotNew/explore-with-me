@@ -12,11 +12,22 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * Маппер для преобразования подборок между сущностями и DTO.
+ */
 @Component
 @RequiredArgsConstructor
 public class CompilationMapper {
+
     private final EventMapper eventMapper;
 
+    /**
+     * Преобразование NewCompilationDto и списка событий в сущность Compilation.
+     *
+     * @param dto    данные для создания подборки
+     * @param events множество событий, входящих в подборку
+     * @return сущность подборки
+     */
     public Compilation toEntity(NewCompilationDto dto, Set<Event> events) {
         Compilation compilation = new Compilation();
         compilation.setTitle(dto.getTitle());
@@ -25,6 +36,12 @@ public class CompilationMapper {
         return compilation;
     }
 
+    /**
+     * Преобразование сущности Compilation в CompilationDto.
+     *
+     * @param compilation сущность подборки
+     * @return DTO подборки с преобразованными событиями
+     */
     public CompilationDto toDto(Compilation compilation) {
         return new CompilationDto(
                 compilation.getEvents().stream()

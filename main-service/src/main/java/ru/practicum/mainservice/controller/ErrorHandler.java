@@ -1,29 +1,30 @@
-package ru.practicum.common.exception;
+package ru.practicum.mainservice.controller;
 
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import ru.practicum.common.exception.*;
+import ru.practicum.mainservice.controller.api.ErrorHandlerApi;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static ru.practicum.common.config.JacksonConfig.DATE_TIME_FORMAT;
+
 @Slf4j
 @RestControllerAdvice
-public class ErrorHandler {
+public class ErrorHandler implements ErrorHandlerApi {
 
     private static final DateTimeFormatter FORMATTER =
-            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            DateTimeFormatter.ofPattern(DATE_TIME_FORMAT);
 
-    @ExceptionHandler(NotFoundException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @Override
     public ApiError handleNotFound(NotFoundException e) {
         log.error("Not found: {}", e.getMessage());
         return new ApiError(
@@ -35,8 +36,7 @@ public class ErrorHandler {
         );
     }
 
-    @ExceptionHandler(BadRequestException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @Override
     public ApiError handleBadRequest(BadRequestException e) {
         log.error("Bad request: {}", e.getMessage());
         return new ApiError(
@@ -48,8 +48,7 @@ public class ErrorHandler {
         );
     }
 
-    @ExceptionHandler(ConflictException.class)
-    @ResponseStatus(HttpStatus.CONFLICT)
+    @Override
     public ApiError handleConflict(ConflictException e) {
         log.error("Conflict: {}", e.getMessage());
         return new ApiError(
@@ -61,8 +60,7 @@ public class ErrorHandler {
         );
     }
 
-    @ExceptionHandler(ForbiddenException.class)
-    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @Override
     public ApiError handleForbidden(ForbiddenException e) {
         log.error("Forbidden: {}", e.getMessage());
         return new ApiError(
@@ -74,8 +72,7 @@ public class ErrorHandler {
         );
     }
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @Override
     public ApiError handleValidation(MethodArgumentNotValidException e) {
         log.error("Validation error: {}", e.getMessage());
 
@@ -99,8 +96,7 @@ public class ErrorHandler {
         );
     }
 
-    @ExceptionHandler(MissingServletRequestParameterException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @Override
     public ApiError handleMissingParams(MissingServletRequestParameterException e) {
         return new ApiError(
                 null,
@@ -111,8 +107,7 @@ public class ErrorHandler {
         );
     }
 
-    @ExceptionHandler(Exception.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @Override
     public ApiError handleException(Exception e) {
         log.error("Internal server error: {}", e.getMessage(), e);
         return new ApiError(
@@ -124,8 +119,7 @@ public class ErrorHandler {
         );
     }
 
-    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @Override
     public ApiError handleMethodArgumentTypeMismatch(
             MethodArgumentTypeMismatchException exception
     ) {
@@ -137,8 +131,7 @@ public class ErrorHandler {
                 LocalDateTime.now().format(FORMATTER));
     }
 
-    @ExceptionHandler(ConstraintViolationException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @Override
     public ApiError handleConstraintViolation(
             ConstraintViolationException e
     ) {

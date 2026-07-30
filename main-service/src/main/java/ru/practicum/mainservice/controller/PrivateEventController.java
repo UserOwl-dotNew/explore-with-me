@@ -1,4 +1,4 @@
-package ru.practicum.mainservice.events.controller;
+package ru.practicum.mainservice.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.common.dto.EventShortDto;
+import ru.practicum.mainservice.controller.api.PrivateEventControllerApi;
 import ru.practicum.mainservice.events.dto.EventFullDto;
 import ru.practicum.mainservice.events.dto.NewEventDto;
 import ru.practicum.mainservice.events.dto.UpdateEventUserRequest;
@@ -17,20 +18,11 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/users/{userId}/events")
-public class PrivateEventController {
+public class PrivateEventController implements PrivateEventControllerApi {
 
     private final EventService eventService;
 
-    /**
-     * Получение событий, добавленных текущим пользователем
-     * GET /users/{userId}/events
-     *
-     * @param userId Id пользователя
-     * @param from   С какого события показать информацию
-     * @param size   Сколько событий показать за раз
-     * @return Список событий
-     */
-    @GetMapping
+    @Override
     public List<EventShortDto> getUserEvents(
             @PathVariable Long userId,
             @RequestParam(defaultValue = "0") int from,
@@ -40,16 +32,7 @@ public class PrivateEventController {
         return eventService.getUserEvents(userId, from, size);
     }
 
-    /**
-     * Добавление нового события
-     * POST /users/{userId}/events
-     *
-     * @param userId Id пользователя
-     * @param dto    Сущность нового события
-     * @return Полная информация о событии
-     */
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
+    @Override
     public EventFullDto createEvent(
             @PathVariable Long userId,
             @Valid @RequestBody NewEventDto dto) {
@@ -58,15 +41,7 @@ public class PrivateEventController {
         return eventService.createEvent(userId, dto);
     }
 
-    /**
-     * Получение полной информации о событии добавленном текущим пользователем
-     * GET /users/{userId}/events/{eventId}
-     *
-     * @param userId  Id пользователя
-     * @param eventId Id события
-     * @return Полная информация о событии
-     */
-    @GetMapping("/{eventId}")
+    @Override
     public EventFullDto getEvent(
             @PathVariable Long userId,
             @PathVariable Long eventId) {
@@ -75,16 +50,7 @@ public class PrivateEventController {
         return eventService.getUserEvent(userId, eventId);
     }
 
-    /**
-     * Изменение события добавленного текущим пользователем
-     * PATCH /users/{userId}/events/{eventId}
-     *
-     * @param userId  Id пользователя
-     * @param eventId Id события
-     * @param request Запрос с измененными данными для события
-     * @return Полная информация о событии
-     */
-    @PatchMapping("/{eventId}")
+    @Override
     public EventFullDto updateEvent(
             @PathVariable Long userId,
             @PathVariable Long eventId,

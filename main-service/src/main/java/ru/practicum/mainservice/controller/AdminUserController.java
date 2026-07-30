@@ -1,4 +1,4 @@
-package ru.practicum.mainservice.users.controller;
+package ru.practicum.mainservice.controller;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.common.dto.UserDto;
+import ru.practicum.mainservice.controller.api.AdminUserControllerApi;
 import ru.practicum.mainservice.users.dto.NewUserRequest;
 import ru.practicum.mainservice.users.service.UserService;
 
@@ -20,11 +21,11 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/admin/users")
-public class AdminUserController {
+public class AdminUserController implements AdminUserControllerApi {
 
     private final UserService userService;
 
-    @GetMapping
+    @Override
     public List<UserDto> getUsers(
             @RequestParam(required = false) List<Long> ids,
             @RequestParam(defaultValue = "0")
@@ -45,8 +46,7 @@ public class AdminUserController {
         );
     }
 
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
+    @Override
     public UserDto createUser(
             @Valid @RequestBody NewUserRequest request
     ) {
@@ -55,8 +55,7 @@ public class AdminUserController {
         return userService.createUser(request);
     }
 
-    @DeleteMapping("/{userId}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Override
     public void deleteUser(@PathVariable Long userId) {
         log.info("DELETE /admin/users/{}", userId);
 

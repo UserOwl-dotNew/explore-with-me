@@ -1,4 +1,4 @@
-package ru.practicum.statistics.client;
+package ru.practicum.statistics.client.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,19 +11,21 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import ru.practicum.dto.EndpointHit;
 import ru.practicum.dto.ViewStats;
+import ru.practicum.statistics.client.controller.api.StatsClientApi;
 
 import java.util.List;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class StatsClient {
+public class StatsClient implements StatsClientApi {
 
     private final RestTemplate restTemplate;
 
     @Value("${stats-server.url:http://localhost:9090}")
     private String serverUrl;
 
+    @Override
     public void sendHit(EndpointHit hit) {
         try {
             restTemplate.postForEntity(serverUrl + "/hit", hit, Void.class);
@@ -33,6 +35,7 @@ public class StatsClient {
         }
     }
 
+    @Override
     public List<ViewStats> getStats(String start, String end, List<String> uris, Boolean unique) {
         try {
             UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(serverUrl + "/stats")

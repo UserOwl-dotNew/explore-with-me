@@ -6,14 +6,14 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Широта и долгота места проведения события
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Embeddable
 public class Location {
-    /**
-     * Широта и долгота места проведения события
-     */
     @Column(name = "lat")
     private Float lat;
 

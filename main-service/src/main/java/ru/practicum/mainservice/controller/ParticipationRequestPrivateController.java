@@ -1,11 +1,11 @@
-package ru.practicum.mainservice.requests.controller;
+package ru.practicum.mainservice.controller;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.mainservice.controller.api.ParticipationRequestControllerApi;
 import ru.practicum.mainservice.requests.dto.EventRequestStatusUpdateRequest;
 import ru.practicum.mainservice.requests.dto.EventRequestStatusUpdateResult;
 import ru.practicum.mainservice.requests.dto.ParticipationRequestDto;
@@ -17,35 +17,34 @@ import java.util.List;
 @RequestMapping("/users/{userId}")
 @RequiredArgsConstructor
 @Validated
-public class ParticipationRequestPrivateController {
+public class ParticipationRequestPrivateController implements ParticipationRequestControllerApi {
 
     private final ParticipationRequestService requestService;
 
-    @GetMapping("/requests")
+    @Override
     public List<ParticipationRequestDto> getUserRequests(@PathVariable @Positive Long userId) {
         return requestService.getUserRequests(userId);
     }
 
-    @PostMapping("/requests")
-    @ResponseStatus(HttpStatus.CREATED)
+    @Override
     public ParticipationRequestDto addRequest(@PathVariable @Positive Long userId,
                                               @RequestParam @Positive Long eventId) {
         return requestService.addRequest(userId, eventId);
     }
 
-    @PatchMapping("/requests/{requestId}/cancel")
+    @Override
     public ParticipationRequestDto cancelRequest(@PathVariable @Positive Long userId,
                                                  @PathVariable @Positive Long requestId) {
         return requestService.cancelRequest(userId, requestId);
     }
 
-    @GetMapping("/events/{eventId}/requests")
+    @Override
     public List<ParticipationRequestDto> getEventRequests(@PathVariable @Positive Long userId,
                                                           @PathVariable @Positive Long eventId) {
         return requestService.getEventRequests(userId, eventId);
     }
 
-    @PatchMapping("/events/{eventId}/requests")
+    @Override
     public EventRequestStatusUpdateResult updateRequestStatus(@PathVariable @Positive Long userId,
                                                               @PathVariable @Positive Long eventId,
                                                               @RequestBody @Valid EventRequestStatusUpdateRequest updateRequest) {

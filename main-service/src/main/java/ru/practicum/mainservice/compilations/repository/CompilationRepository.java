@@ -11,8 +11,20 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Репозиторий для работы с подборками событий.
+ * Предоставляет методы для поиска подборок с пагинацией и загрузкой связанных событий.
+ */
 public interface CompilationRepository extends JpaRepository<Compilation, Long> {
 
+    /**
+     * Получение идентификаторов подборок с фильтрацией по флагу закрепления.
+     * Используется для пагинированного поиска.
+     *
+     * @param pinned   фильтр по закрепленным/незакрепленным подборкам (опционально)
+     * @param pageable параметры пагинации
+     * @return страница с идентификаторами подборок
+     */
     @Query("""
             SELECT c.id
             FROM Compilation c
@@ -24,6 +36,13 @@ public interface CompilationRepository extends JpaRepository<Compilation, Long> 
             Pageable pageable
     );
 
+    /**
+     * Получение списка подборок с загрузкой связанных событий и их данных.
+     * Выполняет JOIN FETCH для предотвращения N+1 проблемы.
+     *
+     * @param ids список идентификаторов подборок
+     * @return список подборок с предзагруженными событиями, категориями и инициаторами
+     */
     @Query("""
             SELECT DISTINCT c
             FROM Compilation c
@@ -36,6 +55,12 @@ public interface CompilationRepository extends JpaRepository<Compilation, Long> 
             @Param("ids") Collection<Long> ids
     );
 
+    /**
+     * Получение подборки по идентификатору с загрузкой связанных событий.
+     *
+     * @param compId идентификатор подборки
+     * @return Optional с подборкой, если найдена
+     */
     @Query("""
             SELECT DISTINCT c
             FROM Compilation c

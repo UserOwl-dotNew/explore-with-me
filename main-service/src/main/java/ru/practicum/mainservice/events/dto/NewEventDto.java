@@ -12,35 +12,67 @@ import ru.practicum.common.dto.LocationDto;
 
 import java.time.LocalDateTime;
 
+/**
+ * DTO для создания нового события пользователем.
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class NewEventDto {
-    @NotBlank
-    @Size(min = 20, max = 2000)
+
+    /**
+     * Краткое описание события. От 20 до 2000 символов.
+     */
+    @NotBlank(message = "Аннотация не может быть пустой")
+    @Size(min = 20, max = 2000, message = "Аннотация должна быть от 20 до 2000 символов")
     private String annotation;
 
-    @NotNull
+    /**
+     * Идентификатор категории события.
+     */
+    @NotNull(message = "Категория обязательна")
     private Long category;
 
-    @NotBlank
-    @Size(min = 20, max = 7000)
+    /**
+     * Полное описание события. От 20 до 7000 символов.
+     */
+    @NotBlank(message = "Описание не может быть пустым")
+    @Size(min = 20, max = 7000, message = "Описание должно быть от 20 до 7000 символов")
     private String description;
 
-    @NotNull
+    /**
+     * Дата и время проведения события.
+     * Должна быть минимум через 2 часа от текущего момента.
+     */
+    @NotNull(message = "Дата события обязательна")
     @JsonFormat(pattern = JacksonConfig.DATE_TIME_FORMAT)
     private LocalDateTime eventDate;
 
-    @NotNull
+    /**
+     * Местоположение события.
+     */
+    @NotNull(message = "Местоположение обязательно")
     private LocationDto location;
 
+    /**
+     * Флаг платности участия. По умолчанию false.
+     */
     private Boolean paid = false;
 
+    /**
+     * Лимит участников. 0 — без ограничений. По умолчанию 0.
+     */
     private Integer participantLimit = 0;
 
+    /**
+     * Флаг пре-модерации заявок. По умолчанию true.
+     */
     private Boolean requestModeration = true;
 
-    @NotBlank
-    @Size(min = 3, max = 120)
+    /**
+     * Заголовок события. От 3 до 120 символов.
+     */
+    @NotBlank(message = "Заголовок не может быть пустым")
+    @Size(min = 3, max = 120, message = "Заголовок должен быть от 3 до 120 символов")
     private String title;
 }

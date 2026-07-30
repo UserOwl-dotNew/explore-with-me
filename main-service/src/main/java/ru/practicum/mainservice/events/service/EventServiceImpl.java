@@ -33,13 +33,15 @@ import ru.practicum.mainservice.events.repository.EventRepositoryCustom;
 import ru.practicum.mainservice.events.utils.EventUpdateUtils;
 import ru.practicum.mainservice.requests.repository.ParticipationRequestRepository;
 import ru.practicum.mainservice.users.service.UserService;
-import ru.practicum.statistics.client.StatsClient;
+import ru.practicum.statistics.client.controller.StatsClient;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static ru.practicum.common.config.JacksonConfig.DATE_TIME_FORMAT;
 
 @Service
 @Slf4j
@@ -57,7 +59,7 @@ public class EventServiceImpl implements EventService {
 
     private static final String APP_NAME = "ewm-service";
     private static final DateTimeFormatter FORMATTER =
-            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            DateTimeFormatter.ofPattern(DATE_TIME_FORMAT);
 
     @Override
     public List<EventFullDto> getAdminEvents(List<Long> users, List<EventState> states, List<Long> categories,

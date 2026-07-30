@@ -1,11 +1,14 @@
-package ru.practicum.mainservice.categories.controller;
+package ru.practicum.mainservice.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.common.dto.CategoryDto;
+import ru.practicum.mainservice.controller.api.AdminCategoryControllerApi;
 import ru.practicum.mainservice.categories.dto.NewCategoryDto;
 import ru.practicum.mainservice.categories.service.CategoryService;
 
@@ -13,26 +16,17 @@ import ru.practicum.mainservice.categories.service.CategoryService;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/admin/categories")
-public class AdminCategoryController {
+public class AdminCategoryController implements AdminCategoryControllerApi {
 
     private final CategoryService categoryService;
 
-    /**
-     * Добавление новой категории
-     * POST /admin/categories
-     */
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
+    @Override
     public CategoryDto addCategory(@Valid @RequestBody NewCategoryDto dto) {
         log.info("POST /admin/categories with request: {}", dto);
         return categoryService.createCategory(dto);
     }
 
-    /**
-     * Изменение категории
-     * PATCH /admin/categories/{catId}
-     */
-    @PatchMapping("/{catId}")
+    @Override
     public CategoryDto updateCategory(
             @PathVariable Long catId,
             @Valid @RequestBody CategoryDto dto) {
@@ -40,12 +34,7 @@ public class AdminCategoryController {
         return categoryService.updateCategory(catId, dto);
     }
 
-    /**
-     * Удаление категории
-     * DELETE /admin/categories/{catId}
-     */
-    @DeleteMapping("/{catId}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Override
     public void deleteCategory(@PathVariable Long catId) {
         log.info("DELETE /admin/categories/{}", catId);
         categoryService.deleteCategory(catId);

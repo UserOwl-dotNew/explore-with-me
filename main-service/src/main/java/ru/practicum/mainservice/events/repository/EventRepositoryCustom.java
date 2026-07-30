@@ -19,6 +19,12 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Кастомный репозиторий для сложных запросов к событиям с использованием Criteria API.
+ * <p>
+ * Используется для динамического построения запросов с опциональными параметрами фильтрации.
+ * </p>
+ */
 @Slf4j
 @Repository
 public class EventRepositoryCustom {
@@ -26,6 +32,18 @@ public class EventRepositoryCustom {
     @PersistenceContext
     private EntityManager entityManager;
 
+    /**
+     * Поиск опубликованных событий с фильтрацией для публичного API.
+     * Использует динамическое построение запроса через Criteria API.
+     *
+     * @param text       текст для поиска в аннотации и описании (опционально)
+     * @param categories список идентификаторов категорий (опционально)
+     * @param paid       фильтр по платности (опционально)
+     * @param rangeStart дата и время начала диапазона (опционально)
+     * @param rangeEnd   дата и время окончания диапазона (опционально)
+     * @param pageable   параметры пагинации
+     * @return страница опубликованных событий
+     */
     public Page<Event> findPublishedEvents(
             String text,
             List<Long> categories,
@@ -36,6 +54,7 @@ public class EventRepositoryCustom {
     ) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
 
+        // Запрос для подсчета количества
         CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
         Root<Event> countRoot = countQuery.from(Event.class);
         countQuery.select(cb.count(countRoot));
@@ -46,7 +65,7 @@ public class EventRepositoryCustom {
         }
         Long total = entityManager.createQuery(countQuery).getSingleResult();
 
-
+        // Запрос для получения данных
         CriteriaQuery<Event> query = cb.createQuery(Event.class);
         Root<Event> root = query.from(Event.class);
         query.select(root);
@@ -73,6 +92,18 @@ public class EventRepositoryCustom {
         return new PageImpl<>(events, pageable, total);
     }
 
+    /**
+     * Построение предикатов для фильтрации опубликованных событий.
+     *
+     * @param cb         CriteriaBuilder
+     * @param root       корневой элемент запроса
+     * @param text       текст для поиска
+     * @param categories список категорий
+     * @param paid       флаг платности
+     * @param rangeStart начало диапазона дат
+     * @param rangeEnd   конец диапазона дат
+     * @return список предикатов для WHERE-условия
+     */
     private List<Predicate> buildPredicates(
             CriteriaBuilder cb,
             Root<Event> root,
@@ -84,8 +115,10 @@ public class EventRepositoryCustom {
     ) {
         List<Predicate> predicates = new ArrayList<>();
 
+        // Всегда фильтруем только опубликованные события
         predicates.add(cb.equal(root.get("state"), EventState.PUBLISHED));
 
+        // Поиск по тексту (без учета регистра)
         if (text != null && !text.isEmpty()) {
             String searchPattern = "%" + text + "%";
             Predicate annotationPredicate = cb.like(
@@ -99,14 +132,17 @@ public class EventRepositoryCustom {
             predicates.add(cb.or(annotationPredicate, descriptionPredicate));
         }
 
+        // Фильтр по категориям
         if (categories != null && !categories.isEmpty()) {
             predicates.add(root.get("category").get("id").in(categories));
         }
 
+        // Фильтр по платности
         if (paid != null) {
             predicates.add(cb.equal(root.get("paid"), paid));
         }
 
+        // Фильтр по диапазону дат
         if (rangeStart != null) {
             predicates.add(cb.greaterThanOrEqualTo(root.get("eventDate"), rangeStart));
         }
@@ -117,6 +153,18 @@ public class EventRepositoryCustom {
         return predicates;
     }
 
+    /**
+     * Поиск событий с административной фильтрацией.
+     * Все параметры опциональны.
+     *
+     * @param users      список идентификаторов пользователей (опционально)
+     * @param states     список состояний событий (опционально)
+     * @param categories список идентификаторов категорий (опционально)
+     * @param rangeStart дата и время начала диапазона (опционально)
+     * @param rangeEnd   дата и время окончания диапазона (опционально)
+     * @param pageable   параметры пагинации
+     * @return страница событий
+     */
     public Page<Event> findAllByAdminFilters(
             List<Long> users,
             List<EventState> states,
@@ -127,7 +175,7 @@ public class EventRepositoryCustom {
     ) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
 
-
+        // Запрос для подсчета количества
         CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
         Root<Event> countRoot = countQuery.from(Event.class);
         countQuery.select(cb.count(countRoot));
@@ -138,7 +186,7 @@ public class EventRepositoryCustom {
         }
         Long total = entityManager.createQuery(countQuery).getSingleResult();
 
-
+        // Запрос для получения данных
         CriteriaQuery<Event> query = cb.createQuery(Event.class);
         Root<Event> root = query.from(Event.class);
         query.select(root);
@@ -158,6 +206,18 @@ public class EventRepositoryCustom {
         return new PageImpl<>(events, pageable, total);
     }
 
+    /**
+     * Построение предикатов для административной фильтрации событий.
+     *
+     * @param cb         CriteriaBuilder
+     * @param root       корневой элемент запроса
+     * @param users      список пользователей
+     * @param states     список статусов
+     * @param categories список категорий
+     * @param rangeStart начало диапазона дат
+     * @param rangeEnd   конец диапазона дат
+     * @return список предикатов для WHERE-условия
+     */
     private List<Predicate> buildAdminPredicates(
             CriteriaBuilder cb,
             Root<Event> root,
@@ -169,18 +229,22 @@ public class EventRepositoryCustom {
     ) {
         List<Predicate> predicates = new ArrayList<>();
 
+        // Фильтр по инициаторам
         if (users != null && !users.isEmpty()) {
             predicates.add(root.get("initiator").get("id").in(users));
         }
 
+        // Фильтр по статусам
         if (states != null && !states.isEmpty()) {
             predicates.add(root.get("state").in(states));
         }
 
+        // Фильтр по категориям
         if (categories != null && !categories.isEmpty()) {
             predicates.add(root.get("category").get("id").in(categories));
         }
 
+        // Фильтр по диапазону дат
         if (rangeStart != null) {
             predicates.add(cb.greaterThanOrEqualTo(root.get("eventDate"), rangeStart));
         }

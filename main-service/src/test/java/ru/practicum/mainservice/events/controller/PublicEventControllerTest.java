@@ -6,6 +6,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.common.dto.EventShortDto;
+import ru.practicum.mainservice.controller.PublicEventController;
 import ru.practicum.mainservice.events.service.EventService;
 
 import java.time.LocalDateTime;
