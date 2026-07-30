@@ -12,8 +12,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 import ru.practicum.dto.EndpointHit;
 import ru.practicum.dto.ViewStats;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 @Slf4j
@@ -50,7 +48,8 @@ public class StatsClient {
                     url,
                     HttpMethod.GET,
                     null,
-                    new ParameterizedTypeReference<List<ViewStats>>() {}
+                    new ParameterizedTypeReference<List<ViewStats>>() {
+                    }
             );
 
             log.info("Stats response status: {}", response.getStatusCode());
