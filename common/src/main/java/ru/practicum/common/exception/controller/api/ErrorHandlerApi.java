@@ -1,4 +1,4 @@
-package ru.practicum.mainservice.controller.api;
+package ru.practicum.common.exception.controller.api;
 
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;

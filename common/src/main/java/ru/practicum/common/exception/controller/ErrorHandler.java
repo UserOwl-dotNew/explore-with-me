@@ -1,4 +1,4 @@
-package ru.practicum.mainservice.controller;
+package ru.practicum.common.exception.controller;
 
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
@@ -8,7 +8,7 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import ru.practicum.common.exception.*;
-import ru.practicum.mainservice.controller.api.ErrorHandlerApi;
+import ru.practicum.common.exception.controller.api.ErrorHandlerApi;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
