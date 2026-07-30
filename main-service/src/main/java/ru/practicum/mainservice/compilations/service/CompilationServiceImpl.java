@@ -155,12 +155,12 @@ public class CompilationServiceImpl implements CompilationService {
         }
 
         Map<Long, Compilation> compilationsById = compilationRepository
-                        .findAllByIdsWithEvents(compilationIds)
-                        .stream()
-                        .collect(Collectors.toMap(
-                                Compilation::getId,
-                                compilation -> compilation
-                        ));
+                .findAllByIdsWithEvents(compilationIds)
+                .stream()
+                .collect(Collectors.toMap(
+                        Compilation::getId,
+                        compilation -> compilation
+                ));
 
         return compilationIds.stream()
                 .map(compilationsById::get)

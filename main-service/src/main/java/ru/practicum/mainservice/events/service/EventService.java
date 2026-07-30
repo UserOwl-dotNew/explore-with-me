@@ -2,7 +2,10 @@ package ru.practicum.mainservice.events.service;
 
 import ru.practicum.common.dto.EventShortDto;
 import ru.practicum.common.enums.EventState;
-import ru.practicum.mainservice.events.dto.*;
+import ru.practicum.mainservice.events.dto.EventFullDto;
+import ru.practicum.mainservice.events.dto.NewEventDto;
+import ru.practicum.mainservice.events.dto.UpdateEventAdminRequest;
+import ru.practicum.mainservice.events.dto.UpdateEventUserRequest;
 import ru.practicum.mainservice.events.entity.Event;
 
 import java.time.LocalDateTime;
@@ -178,8 +181,6 @@ public interface EventService {
      * @throws ru.practicum.common.exception.BadRequestException если запрос составлен некорректно
      */
     EventFullDto getPublicEvent(Long eventId);
-
-    // ==================== INTERNAL (для других сервисов) ====================
 
     /**
      * Internal: Получение сущности события по идентификатору

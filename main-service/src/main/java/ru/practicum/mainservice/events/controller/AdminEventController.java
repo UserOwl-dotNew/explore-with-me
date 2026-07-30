@@ -13,7 +13,6 @@ import ru.practicum.mainservice.events.service.EventService;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static ru.practicum.common.config.JacksonConfig.DATE_TIME_FORMAT;
 
@@ -34,13 +33,13 @@ public class AdminEventController {
      * Возвращает полную информацию обо всех событиях, соответствующих переданным условиям.
      * Если событий не найдено - возвращает пустой список.
      *
-     * @param users       список ID пользователей, чьи события нужно найти (опционально)
-     * @param states      список состояний событий (опционально)
-     * @param categories  список ID категорий (опционально)
-     * @param rangeStart  дата и время, не раньше которых должно произойти событие (опционально)
-     * @param rangeEnd    дата и время, не позже которых должно произойти событие (опционально)
-     * @param from        количество событий для пропуска (пагинация)
-     * @param size        количество событий в наборе (пагинация)
+     * @param users      список ID пользователей, чьи события нужно найти (опционально)
+     * @param states     список состояний событий (опционально)
+     * @param categories список ID категорий (опционально)
+     * @param rangeStart дата и время, не раньше которых должно произойти событие (опционально)
+     * @param rangeEnd   дата и время, не позже которых должно произойти событие (опционально)
+     * @param from       количество событий для пропуска (пагинация)
+     * @param size       количество событий в наборе (пагинация)
      * @return список событий с полной информацией
      */
     @GetMapping
@@ -68,9 +67,9 @@ public class AdminEventController {
      * @return обновленное событие с полной информацией
      * @throws ru.practicum.common.exception.NotFoundException если событие не найдено
      * @throws ru.practicum.common.exception.ConflictException если:
-     *         - дата начала события раньше чем через час от даты публикации
-     *         - попытка опубликовать событие не в состоянии PENDING
-     *         - попытка отклонить уже опубликованное событие
+     *                                                         - дата начала события раньше чем через час от даты публикации
+     *                                                         - попытка опубликовать событие не в состоянии PENDING
+     *                                                         - попытка отклонить уже опубликованное событие
      */
     @PatchMapping("/{eventId}")
     public EventFullDto updateEvent(

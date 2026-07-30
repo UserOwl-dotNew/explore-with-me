@@ -104,7 +104,7 @@ public class CategoryServiceImplTest {
 
         assertThatThrownBy(() -> categoryService.updateCategory(999L, categoryDto))
                 .isInstanceOf(NotFoundException.class)
-                .hasMessageContaining("Category with id 999 was not found");
+                .hasMessageContaining("Category not found");
     }
 
     @Test

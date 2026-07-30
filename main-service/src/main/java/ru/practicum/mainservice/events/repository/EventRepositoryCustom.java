@@ -36,7 +36,6 @@ public class EventRepositoryCustom {
     ) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
 
-        // ========== ЗАПРОС ДЛЯ ПОДСЧЕТА ==========
         CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
         Root<Event> countRoot = countQuery.from(Event.class);
         countQuery.select(cb.count(countRoot));
@@ -47,7 +46,7 @@ public class EventRepositoryCustom {
         }
         Long total = entityManager.createQuery(countQuery).getSingleResult();
 
-        // ========== ЗАПРОС ДЛЯ ДАННЫХ ==========
+
         CriteriaQuery<Event> query = cb.createQuery(Event.class);
         Root<Event> root = query.from(Event.class);
         query.select(root);
@@ -57,7 +56,6 @@ public class EventRepositoryCustom {
             query.where(predicates.toArray(new Predicate[0]));
         }
 
-        // Сортировка по ID
         query.orderBy(cb.asc(root.get("id")));
 
         TypedQuery<Event> typedQuery = entityManager.createQuery(query);
@@ -86,10 +84,8 @@ public class EventRepositoryCustom {
     ) {
         List<Predicate> predicates = new ArrayList<>();
 
-        // Всегда фильтруем по PUBLISHED
         predicates.add(cb.equal(root.get("state"), EventState.PUBLISHED));
 
-        // Поиск по тексту
         if (text != null && !text.isEmpty()) {
             String searchPattern = "%" + text + "%";
             Predicate annotationPredicate = cb.like(
@@ -103,17 +99,14 @@ public class EventRepositoryCustom {
             predicates.add(cb.or(annotationPredicate, descriptionPredicate));
         }
 
-        // Категории
         if (categories != null && !categories.isEmpty()) {
             predicates.add(root.get("category").get("id").in(categories));
         }
 
-        // Paid
         if (paid != null) {
             predicates.add(cb.equal(root.get("paid"), paid));
         }
 
-        // Диапазон дат
         if (rangeStart != null) {
             predicates.add(cb.greaterThanOrEqualTo(root.get("eventDate"), rangeStart));
         }
@@ -134,7 +127,7 @@ public class EventRepositoryCustom {
     ) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
 
-        // Запрос для подсчета
+
         CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
         Root<Event> countRoot = countQuery.from(Event.class);
         countQuery.select(cb.count(countRoot));
@@ -145,7 +138,7 @@ public class EventRepositoryCustom {
         }
         Long total = entityManager.createQuery(countQuery).getSingleResult();
 
-        // Запрос для данных
+
         CriteriaQuery<Event> query = cb.createQuery(Event.class);
         Root<Event> root = query.from(Event.class);
         query.select(root);

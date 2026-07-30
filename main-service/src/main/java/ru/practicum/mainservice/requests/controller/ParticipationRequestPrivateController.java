@@ -1,5 +1,7 @@
 package ru.practicum.mainservice.requests.controller;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
@@ -9,8 +11,6 @@ import ru.practicum.mainservice.requests.dto.EventRequestStatusUpdateResult;
 import ru.practicum.mainservice.requests.dto.ParticipationRequestDto;
 import ru.practicum.mainservice.requests.service.ParticipationRequestService;
 
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.Positive;
 import java.util.List;
 
 @RestController

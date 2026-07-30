@@ -4,7 +4,10 @@ import org.mapstruct.*;
 import ru.practicum.common.dto.EventShortDto;
 import ru.practicum.common.entity.Category;
 import ru.practicum.common.entity.User;
-import ru.practicum.mainservice.events.dto.*;
+import ru.practicum.mainservice.events.dto.EventFullDto;
+import ru.practicum.mainservice.events.dto.NewEventDto;
+import ru.practicum.mainservice.events.dto.UpdateEventAdminRequest;
+import ru.practicum.mainservice.events.dto.UpdateEventUserRequest;
 import ru.practicum.mainservice.events.entity.Event;
 
 @Mapper(componentModel = "spring")
