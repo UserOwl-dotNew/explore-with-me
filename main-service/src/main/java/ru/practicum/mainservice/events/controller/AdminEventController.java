@@ -13,6 +13,7 @@ import ru.practicum.mainservice.events.service.EventService;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static ru.practicum.common.config.JacksonConfig.DATE_TIME_FORMAT;
 

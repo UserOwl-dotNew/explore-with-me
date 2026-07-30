@@ -1,6 +1,7 @@
 package ru.practicum.mainservice.events.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -26,6 +27,7 @@ public class UpdateEventAdminRequest {
     private String description;
 
     @JsonFormat(pattern = JacksonConfig.DATE_TIME_FORMAT)
+    @Future(message = "Event date must be in the future")
     private LocalDateTime eventDate;
 
     private LocationDto location;

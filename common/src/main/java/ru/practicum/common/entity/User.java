@@ -15,8 +15,7 @@ public class User {
      * Пользователь
      */
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "entity_seq")
-    @SequenceGenerator(name = "entity_seq", sequenceName = "entity_seq", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name = "email", nullable = false, unique = true, length = 254)

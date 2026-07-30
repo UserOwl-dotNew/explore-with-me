@@ -3,6 +3,9 @@ package ru.practicum.statistics.client;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -36,19 +39,27 @@ public class StatsClient {
         try {
             UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(serverUrl + "/stats")
                     .queryParam("start", start)
-                    .queryParam("end", end);
-            if (uris != null && !uris.isEmpty()) {
-                builder.queryParam("uris", String.join(",", uris));
-            }
-            if (unique != null) {
-                builder.queryParam("unique", unique);
-            }
+                    .queryParam("end", end)
+                    .queryParam("uris", String.join(",", uris))
+                    .queryParam("unique", unique);
 
-            ViewStats[] response = restTemplate.getForObject(builder.toUriString(), ViewStats[].class);
-            return Arrays.asList(response);
+            String url = builder.build().toUriString();
+            log.info("Requesting stats: {}", url);
+
+            ResponseEntity<List<ViewStats>> response = restTemplate.exchange(
+                    url,
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<List<ViewStats>>() {}
+            );
+
+            log.info("Stats response status: {}", response.getStatusCode());
+            log.info("Stats response body: {}", response.getBody());
+
+            return response.getBody() != null ? response.getBody() : List.of();
         } catch (Exception e) {
-            log.error("Ошибка при получении статистики: {}", e.getMessage());
-            return Collections.emptyList();
+            log.error("Error getting stats: {}", e.getMessage(), e);
+            return List.of();
         }
     }
 }

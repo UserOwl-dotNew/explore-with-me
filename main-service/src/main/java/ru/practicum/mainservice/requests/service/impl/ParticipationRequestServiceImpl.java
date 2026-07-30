@@ -14,7 +14,7 @@ import ru.practicum.mainservice.requests.dto.EventRequestStatusUpdateResult;
 import ru.practicum.mainservice.requests.dto.ParticipationRequestDto;
 import ru.practicum.mainservice.requests.entity.ParticipationRequest;
 import ru.practicum.mainservice.requests.repository.ParticipationRequestRepository;
-import ru.practicum.mainservice.service.EventService;
+import ru.practicum.mainservice.events.service.EventService;
 import ru.practicum.mainservice.requests.service.ParticipationRequestService;
 import ru.practicum.mainservice.events.entity.Event;
 
@@ -53,9 +53,9 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
 
     @Override
     public ParticipationRequestDto addRequest(Long userId, Long eventId) {
-        Event event = eventService.getEventById(eventId);
+        Event event = eventService.getEventEntity(eventId);
 
-        if (!EventState.PUBLISHED.name().equals(event.getState())) {
+        if (event.getState() != EventState.PUBLISHED) {
             throw new ConflictException("Нельзя участвовать в неопубликованном событии");
         }
         if (event.getInitiator().getId().equals(userId)) {
@@ -104,7 +104,7 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
     @Override
     @Transactional(readOnly = true)
     public List<ParticipationRequestDto> getEventRequests(Long userId, Long eventId) {
-        Event event = eventService.getEventById(eventId);
+        Event event = eventService.getEventEntity(eventId);
         if (!event.getInitiator().getId().equals(userId)) {
             throw new ConflictException("Только инициатор события может видеть заявки");
         }
@@ -117,7 +117,7 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
     @Override
     public EventRequestStatusUpdateResult updateRequestStatus(Long userId, Long eventId,
                                                               EventRequestStatusUpdateRequest updateRequest) {
-        Event event = eventService.getEventById(eventId);
+        Event event = eventService.getEventEntity(eventId);
         if (!event.getInitiator().getId().equals(userId)) {
             throw new ConflictException("Только инициатор может менять статус заявок");
         }
