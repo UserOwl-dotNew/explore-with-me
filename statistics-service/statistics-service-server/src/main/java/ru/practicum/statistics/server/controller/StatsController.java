@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.common.exception.BadRequestException;
 import ru.practicum.dto.EndpointHit;
 import ru.practicum.dto.ViewStats;
 import ru.practicum.statistics.server.model.HitEntity;
@@ -23,12 +24,17 @@ public class StatsController {
     private final StatsService service;
 
     @GetMapping("/stats")
-    public Collection<ViewStats> getAll(@RequestParam @DateTimeFormat(pattern = DATE_TIME_FORMAT) LocalDateTime start,
-                                        @RequestParam @DateTimeFormat(pattern = DATE_TIME_FORMAT) LocalDateTime end,
+    public Collection<ViewStats> getAll(@RequestParam(required = true) @DateTimeFormat(pattern = DATE_TIME_FORMAT) LocalDateTime start,
+                                        @RequestParam(required = true) @DateTimeFormat(pattern = DATE_TIME_FORMAT) LocalDateTime end,
                                         @RequestParam(required = false) List<String> uris,
                                         @RequestParam(defaultValue = "false") boolean unique) {
         log.info("GET /stats REQUEST: start= {} end= {} uris_count= {} unique= {}",
                 start, end, uris != null ? uris.size() : 0, unique);
+
+        if (start.isAfter(end)) {
+            throw new BadRequestException("Start date must be before or equal to end date");
+        }
+
         List<ViewStats> stats = service.getStats(start, end, uris, unique);
         log.info("GET /stats RESPONSE: stats_size= {}", stats.size());
         return stats;
