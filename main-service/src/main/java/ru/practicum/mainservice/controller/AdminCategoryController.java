@@ -8,9 +8,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.common.dto.CategoryDto;
-import ru.practicum.mainservice.controller.api.AdminCategoryControllerApi;
 import ru.practicum.mainservice.categories.dto.NewCategoryDto;
 import ru.practicum.mainservice.categories.service.CategoryService;
+import ru.practicum.mainservice.controller.api.AdminCategoryControllerApi;
 
 @Slf4j
 @RestController
