@@ -1,11 +1,11 @@
-package ru.practicum.mainservice.controller;
+package ru.practicum.mainservice.controller.requests;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.mainservice.controller.api.ParticipationRequestControllerApi;
+import ru.practicum.mainservice.controller.api.requests.ParticipationRequestControllerApi;
 import ru.practicum.mainservice.requests.dto.EventRequestStatusUpdateRequest;
 import ru.practicum.mainservice.requests.dto.EventRequestStatusUpdateResult;
 import ru.practicum.mainservice.requests.dto.ParticipationRequestDto;

@@ -1,4 +1,4 @@
-package ru.practicum.mainservice.controller;
+package ru.practicum.mainservice.controller.category;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.common.dto.CategoryDto;
 import ru.practicum.mainservice.categories.dto.NewCategoryDto;
 import ru.practicum.mainservice.categories.service.CategoryService;
-import ru.practicum.mainservice.controller.api.AdminCategoryControllerApi;
+import ru.practicum.mainservice.controller.api.category.AdminCategoryControllerApi;
 
 @Slf4j
 @RestController

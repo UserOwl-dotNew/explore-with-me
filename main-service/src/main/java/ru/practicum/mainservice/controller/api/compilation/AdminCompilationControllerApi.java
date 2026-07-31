@@ -1,4 +1,4 @@
-package ru.practicum.mainservice.controller.api;
+package ru.practicum.mainservice.controller.api.compilation;
 
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;

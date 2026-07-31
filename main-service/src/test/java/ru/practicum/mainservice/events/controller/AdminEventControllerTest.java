@@ -19,7 +19,7 @@ import ru.practicum.common.entity.Location;
 import ru.practicum.common.entity.User;
 import ru.practicum.common.enums.AdminStateAction;
 import ru.practicum.common.enums.EventState;
-import ru.practicum.mainservice.controller.AdminEventController;
+import ru.practicum.mainservice.controller.event.AdminEventController;
 import ru.practicum.mainservice.events.dto.EventFullDto;
 import ru.practicum.mainservice.events.dto.UpdateEventAdminRequest;
 import ru.practicum.mainservice.events.service.EventService;

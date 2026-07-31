@@ -1,4 +1,4 @@
-package ru.practicum.mainservice.controller;
+package ru.practicum.mainservice.controller.category;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.common.dto.CategoryDto;
 import ru.practicum.mainservice.categories.service.CategoryService;
-import ru.practicum.mainservice.controller.api.PublicCategoryControllerApi;
+import ru.practicum.mainservice.controller.api.category.PublicCategoryControllerApi;
 
 import java.util.List;
 

@@ -1,4 +1,4 @@
-package ru.practicum.mainservice.controller;
+package ru.practicum.mainservice.controller.user;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
@@ -9,7 +9,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.common.dto.UserDto;
-import ru.practicum.mainservice.controller.api.AdminUserControllerApi;
+import ru.practicum.mainservice.controller.api.user.AdminUserControllerApi;
 import ru.practicum.mainservice.users.dto.NewUserRequest;
 import ru.practicum.mainservice.users.service.UserService;
 
