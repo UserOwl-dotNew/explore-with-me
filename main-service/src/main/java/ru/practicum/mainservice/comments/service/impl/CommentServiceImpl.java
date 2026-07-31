@@ -1,5 +1,6 @@
 package ru.practicum.mainservice.comments.service.impl;
 
+import org.springframework.stereotype.Service;
 import ru.practicum.common.dto.CommentDto;
 import ru.practicum.common.dto.NewCommentDto;
 import ru.practicum.common.dto.UpdateCommentDto;
@@ -7,6 +8,7 @@ import ru.practicum.mainservice.comments.service.CommentService;
 
 import java.util.List;
 
+@Service
 public class CommentServiceImpl implements CommentService {
     @Override
     public CommentDto createComment(Long userId, Long eventId, NewCommentDto dto) {
