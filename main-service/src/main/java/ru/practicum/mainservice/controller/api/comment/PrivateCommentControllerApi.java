@@ -1,5 +1,6 @@
 package ru.practicum.mainservice.controller.api.comment;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -33,7 +34,7 @@ public interface PrivateCommentControllerApi {
     CommentDto createComment(
             @PathVariable @Positive Long userId,
             @PathVariable @Positive Long eventId,
-            @RequestBody NewCommentDto request
+            @Valid @RequestBody NewCommentDto request
     );
 
     /**
@@ -51,7 +52,7 @@ public interface PrivateCommentControllerApi {
     CommentDto updateComment(
             @PathVariable @Positive Long userId,
             @PathVariable @Positive Long commentId,
-            @RequestBody UpdateCommentDto request
+            @Valid @RequestBody UpdateCommentDto request
     );
 
     /**

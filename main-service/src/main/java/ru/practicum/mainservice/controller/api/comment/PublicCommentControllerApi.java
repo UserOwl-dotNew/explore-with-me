@@ -36,7 +36,7 @@ public interface PublicCommentControllerApi {
     List<CommentDto> getComments(
             @PathVariable @Positive Long eventId,
             @RequestParam(defaultValue = "0") @PositiveOrZero int from,
-            @RequestParam(defaultValue = "10") @PositiveOrZero int size,
+            @RequestParam(defaultValue = "10") @Positive int size,
             @RequestParam(defaultValue = "createdAt") String sort
     );
 

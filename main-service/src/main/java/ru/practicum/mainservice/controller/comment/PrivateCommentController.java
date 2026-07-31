@@ -2,6 +2,7 @@ package ru.practicum.mainservice.controller.comment;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.common.dto.CommentDto;
@@ -12,6 +13,7 @@ import ru.practicum.mainservice.controller.api.comment.PrivateCommentControllerA
 
 @Slf4j
 @RestController
+@Validated
 @RequiredArgsConstructor
 @RequestMapping("/users/{userId}/comments")
 public class PrivateCommentController implements PrivateCommentControllerApi {
