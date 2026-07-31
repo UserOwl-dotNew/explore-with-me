@@ -25,7 +25,7 @@ public interface PrivateCommentControllerApi {
      * Пользователь может оставить комментарий только к опубликованному событию.
      * Опционально: только если пользователь был участником события.
      *
-     * @param userId идентификатор пользователя (из пути)
+     * @param userId  идентификатор пользователя (из пути)
      * @param eventId идентификатор события (из пути)
      * @param request DTO с текстом нового комментария
      * @return созданный комментарий с заполненными полями (id, createdAt, etc.)
@@ -43,9 +43,9 @@ public interface PrivateCommentControllerApi {
      * Пользователь может обновлять только свои комментарии.
      * Нельзя обновить удаленный комментарий (soft delete).
      *
-     * @param userId идентификатор пользователя (из пути)
+     * @param userId    идентификатор пользователя (из пути)
      * @param commentId идентификатор комментария (из пути)
-     * @param request DTO с обновленным текстом комментария
+     * @param request   DTO с обновленным текстом комментария
      * @return обновленный комментарий с обновленной датой updatedAt
      */
     @PatchMapping("/{commentId}")
@@ -62,7 +62,7 @@ public interface PrivateCommentControllerApi {
      * Комментарий становится невидимым для других пользователей (isDeleted = true),
      * но остается в базе данных для администратора.
      *
-     * @param userId идентификатор пользователя (из пути)
+     * @param userId    идентификатор пользователя (из пути)
      * @param commentId идентификатор комментария (из пути)
      */
     @DeleteMapping("/{commentId}")
