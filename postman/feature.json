@@ -1,7 +1,7 @@
 {
   "info": {
-    "_postman_id": "902cd7e2-eedf-43c0-8037-3b563a8d022b",
-    "name": "Comments Feature Tests",
+    "_postman_id": "19c62ec2-2b9a-43f0-bee6-921c4d20f974",
+    "name": "Comments Feature Tests Copy",
     "description": "# Тесты для функциональности комментариев",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "38487606"
@@ -131,7 +131,55 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"annotation\": \"Test annotation for comments\",\r\n    \"category\": {{categoryId}},\r\n    \"description\": \"Test description\",\r\n    \"eventDate\": \"2026-12-31 23:59:59\",\r\n    \"location\": {\r\n        \"lat\": 47.222,\r\n        \"lon\": 39.718\r\n    },\r\n    \"paid\": false,\r\n    \"participantLimit\": 10,\r\n    \"requestModeration\": true,\r\n    \"title\": \"Test Event for Comments\"\r\n}",
+              "raw": "{\r\n    \"annotation\": \"Test annotation for comments\",\r\n    \"category\": {{categoryId}},\r\n    \"description\": \"Test description for events\",\r\n    \"eventDate\": \"2026-12-31 23:59:59\",\r\n    \"location\": {\r\n        \"lat\": 47.222,\r\n        \"lon\": 39.718\r\n    },\r\n    \"paid\": false,\r\n    \"participantLimit\": 10,\r\n    \"requestModeration\": true,\r\n    \"title\": \"Test Event for Comments\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/{{userId}}/events",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "{{userId}}",
+                "events"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Создание события Copy",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Событие создано - статус 201\", function () {\r",
+                  "    pm.response.to.have.status(201);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Сохраняем eventId в переменную\", function () {\r",
+                  "    const response = pm.response.json();\r",
+                  "    pm.environment.set(\"eventIdSecond\", response.id);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"annotation\": \"Test annotation for comments\",\r\n    \"category\": {{categoryId}},\r\n    \"description\": \"Test description for events\",\r\n    \"eventDate\": \"2026-12-31 23:59:59\",\r\n    \"location\": {\r\n        \"lat\": 47.222,\r\n        \"lon\": 39.718\r\n    },\r\n    \"paid\": false,\r\n    \"participantLimit\": 10,\r\n    \"requestModeration\": true,\r\n    \"title\": \"Test Event for Comments\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -175,7 +223,7 @@
             }
           ],
           "request": {
-            "method": "POST",
+            "method": "PATCH",
             "header": [],
             "body": {
               "mode": "raw",
@@ -195,6 +243,54 @@
                 "admin",
                 "events",
                 "{{eventId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Публикация события Copy",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Событие опубликовано - статус 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Статус события - PUBLISHED\", function () {\r",
+                  "    const response = pm.response.json();\r",
+                  "    pm.expect(response.state).to.equal(\"PUBLISHED\");\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"stateAction\": \"PUBLISH_EVENT\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/events/{{eventIdSecond}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "events",
+                "{{eventIdSecond}}"
               ]
             }
           },
@@ -354,11 +450,8 @@
               }
             }
           ],
-          "protocolProfileBehavior": {
-            "disableBodyPruning": true
-          },
           "request": {
-            "method": "GET",
+            "method": "POST",
             "header": [],
             "body": {
               "mode": "raw",
@@ -420,7 +513,7 @@
                   "pm.test(\"Данные комментария должен быть корректными\", function() {\r",
                   "    const comment = pm.response.json()[0];\r",
                   "    pm.expect(comment.id).to.equal(1);\r",
-                  "    pm.expect(comment.text).to.equal(\"Wow, so beautiful!!!\");\r",
+                  "    pm.expect(comment.text).to.equal(\"Прекрасное событие, я очень рад присоединиться к нему\");\r",
                   "    pm.expect(comment.eventId).to.equal(1);\r",
                   "    pm.expect(comment.isDeleted).to.equal(false);\r",
                   "})"
@@ -455,12 +548,15 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "pm.test(\"Код статуса ответа 200\", function() {\r",
+                  "pm.test(\"Код статуса ответа 200\", function () {\r",
                   "    pm.response.to.have.status(200);\r",
                   "});\r",
                   "\r",
-                  "pm.test(\"Ответ - пустой массив\", function() {\r",
+                  "pm.test(\"Ответ - массив\", function () {\r",
                   "    pm.expect(pm.response.json()).to.be.an('array');\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Массив пустой\", function () {\r",
                   "    pm.expect(pm.response.json().length).to.equal(0);\r",
                   "});"
                 ],
@@ -474,13 +570,13 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/events/999/comments",
+              "raw": "{{baseUrl}}/events/{{eventIdSecond}}/comments",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "events",
-                "999",
+                "{{eventIdSecond}}",
                 "comments"
               ]
             }
@@ -517,7 +613,7 @@
                   "pm.test(\"Данные комментрия должны быть корректными\", function() {\r",
                   "    const comment = pm.response.json();\r",
                   "    pm.expect(comment.id).to.equal(1);\r",
-                  "    pm.expect(comment.text).to.equal(\"Wow, so beautiful!!!\");\r",
+                  "    pm.expect(comment.text).to.equal(\"Прекрасное событие, я очень рад присоединиться к нему\");\r",
                   "    pm.expect(comment.eventId).to.equal(1);\r",
                   "    pm.expect(comment.isDeleted).to.equal(false);\r",
                   "});"
@@ -656,8 +752,7 @@
   "variable": [
     {
       "key": "baseUrl",
-      "value": "http://localhost:8080",
-      "type": "string"
+      "value": "http://localhost:8080"
     }
   ]
 }
