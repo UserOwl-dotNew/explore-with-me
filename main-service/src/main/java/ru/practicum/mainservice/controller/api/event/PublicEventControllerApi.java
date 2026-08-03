@@ -1,4 +1,4 @@
-package ru.practicum.mainservice.controller.api;
+package ru.practicum.mainservice.controller.api.event;
 
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.GetMapping;

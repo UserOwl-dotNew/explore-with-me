@@ -14,7 +14,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.common.dto.EventShortDto;
 import ru.practicum.common.dto.LocationDto;
 import ru.practicum.common.enums.EventState;
-import ru.practicum.mainservice.controller.PrivateEventController;
+import ru.practicum.mainservice.controller.event.PrivateEventController;
 import ru.practicum.mainservice.events.dto.EventFullDto;
 import ru.practicum.mainservice.events.dto.NewEventDto;
 import ru.practicum.mainservice.events.dto.UpdateEventUserRequest;

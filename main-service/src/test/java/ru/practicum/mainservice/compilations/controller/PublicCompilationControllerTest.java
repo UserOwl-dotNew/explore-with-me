@@ -8,7 +8,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.common.dto.CompilationDto;
 import ru.practicum.mainservice.compilations.service.CompilationService;
-import ru.practicum.mainservice.controller.PublicCompilationController;
+import ru.practicum.mainservice.controller.compilation.PublicCompilationController;
 
 import java.util.LinkedHashSet;
 import java.util.List;

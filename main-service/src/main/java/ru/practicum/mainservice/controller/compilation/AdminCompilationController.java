@@ -1,4 +1,4 @@
-package ru.practicum.mainservice.controller;
+package ru.practicum.mainservice.controller.compilation;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -11,7 +11,7 @@ import ru.practicum.common.dto.CompilationDto;
 import ru.practicum.mainservice.compilations.dto.NewCompilationDto;
 import ru.practicum.mainservice.compilations.dto.UpdateCompilationRequest;
 import ru.practicum.mainservice.compilations.service.CompilationService;
-import ru.practicum.mainservice.controller.api.AdminCompilationControllerApi;
+import ru.practicum.mainservice.controller.api.compilation.AdminCompilationControllerApi;
 
 @Slf4j
 @RestController

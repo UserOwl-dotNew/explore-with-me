@@ -1,4 +1,4 @@
-package ru.practicum.mainservice.controller;
+package ru.practicum.mainservice.controller.event;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.common.dto.EventShortDto;
-import ru.practicum.mainservice.controller.api.PublicEventControllerApi;
+import ru.practicum.mainservice.controller.api.event.PublicEventControllerApi;
 import ru.practicum.mainservice.events.dto.EventFullDto;
 import ru.practicum.mainservice.events.service.EventService;
 

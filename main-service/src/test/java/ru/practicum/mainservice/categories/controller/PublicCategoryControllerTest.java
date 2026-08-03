@@ -10,7 +10,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.common.dto.CategoryDto;
 import ru.practicum.mainservice.categories.service.CategoryService;
-import ru.practicum.mainservice.controller.PublicCategoryController;
+import ru.practicum.mainservice.controller.category.PublicCategoryController;
 
 import java.util.List;
 

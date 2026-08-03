@@ -11,7 +11,7 @@ import ru.practicum.common.dto.CompilationDto;
 import ru.practicum.mainservice.compilations.dto.NewCompilationDto;
 import ru.practicum.mainservice.compilations.dto.UpdateCompilationRequest;
 import ru.practicum.mainservice.compilations.service.CompilationService;
-import ru.practicum.mainservice.controller.AdminCompilationController;
+import ru.practicum.mainservice.controller.compilation.AdminCompilationController;
 
 import java.util.LinkedHashSet;
 import java.util.Set;

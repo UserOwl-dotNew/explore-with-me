@@ -1,11 +1,11 @@
-package ru.practicum.mainservice.controller;
+package ru.practicum.mainservice.controller.event;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.common.dto.EventShortDto;
-import ru.practicum.mainservice.controller.api.PrivateEventControllerApi;
+import ru.practicum.mainservice.controller.api.event.PrivateEventControllerApi;
 import ru.practicum.mainservice.events.dto.EventFullDto;
 import ru.practicum.mainservice.events.dto.NewEventDto;
 import ru.practicum.mainservice.events.dto.UpdateEventUserRequest;

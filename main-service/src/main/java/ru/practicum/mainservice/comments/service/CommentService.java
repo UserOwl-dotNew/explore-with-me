@@ -1,6 +1,5 @@
 package ru.practicum.mainservice.comments.service;
 
-import org.springframework.data.domain.Pageable;
 import ru.practicum.common.dto.CommentDto;
 import ru.practicum.common.dto.NewCommentDto;
 import ru.practicum.common.dto.UpdateCommentDto;
@@ -11,90 +10,164 @@ import ru.practicum.common.exception.NotFoundException;
 import java.util.List;
 
 /**
- * Контракт сервиса комментариев
+ * Сервисный интерфейс для управления комментариями.
+ * <p>
+ * Определяет контракт бизнес-логики для работы с комментариями к событиям.
+ * Реализует основные операции: создание, обновление, удаление и получение комментариев
+ * с разграничением прав доступа для пользователей и администраторов.
+ *
+ * <p>Основные сценарии использования:
+ * <ul>
+ *   <li>Пользователи создают, обновляют и удаляют (soft delete) свои комментарии</li>
+ *   <li>Публичные запросы на получение комментариев к событиям</li>
+ *   <li>Администраторы управляют комментариями (просмотр всех, hard delete)</li>
+ * </ul>
+ *
+ * @see ru.practicum.mainservice.comments.service.impl.CommentServiceImpl
+ * @see ru.practicum.mainservice.comments.repository.CommentRepository
  */
 public interface CommentService {
 
     /**
-     * Создание нового комментария к событию
+     * Создает новый комментарий к событию.
+     * <p>
+     * Процесс создания:
+     * <ol>
+     *   <li>Проверяет существование пользователя и события</li>
+     *   <li>Проверяет, что событие опубликовано (статус PUBLISHED)</li>
+     *   <li>Опционально: проверяет участие пользователя в событии</li>
+     *   <li>Создает комментарий с текущей датой и временем</li>
+     * </ol>
      *
-     * @param userId  ID автора комментария
-     * @param eventId ID события
-     * @param dto     данные нового комментария
-     * @return созданный комментарий
+     * @param userId  идентификатор автора комментария
+     * @param eventId идентификатор события
+     * @param dto     данные нового комментария (текст)
+     * @return созданный комментарий с заполненными полями (id, createdAt, автор)
      * @throws NotFoundException если пользователь или событие не найдены
-     * @throws ConflictException если событие не опубликовано
+     * @throws ConflictException если событие не опубликовано (статус не PUBLISHED)
      * @throws ConflictException если пользователь не участвовал в событии (опционально)
      */
     CommentDto createComment(Long userId, Long eventId, NewCommentDto dto);
 
     /**
-     * Обновление комментария
+     * Обновляет существующий комментарий.
+     * <p>
+     * Процесс обновления:
+     * <ol>
+     *   <li>Проверяет существование комментария</li>
+     *   <li>Проверяет, что пользователь является автором комментария</li>
+     *   <li>Проверяет, что комментарий не был удален (soft delete)</li>
+     *   <li>Обновляет текст и дату последнего изменения</li>
+     * </ol>
      *
-     * @param userId    ID автора комментария
-     * @param commentId ID комментария
-     * @param dto       новые данные комментария
-     * @return обновленный комментарий
+     * @param userId    идентификатор пользователя (для проверки прав)
+     * @param commentId идентификатор обновляемого комментария
+     * @param dto       новые данные комментария (текст)
+     * @return обновленный комментарий с обновленной датой updatedAt
      * @throws NotFoundException  если комментарий не найден
-     * @throws ForbiddenException если пользователь не автор комментария
-     * @throws ConflictException  если комментарий был удален
+     * @throws ForbiddenException если пользователь не является автором комментария
+     * @throws ConflictException  если комментарий был удален (isDeleted = true)
      */
     CommentDto updateComment(Long userId, Long commentId, UpdateCommentDto dto);
 
     /**
-     * Удаление комментария пользователем (soft delete)
+     * Удаляет комментарий пользователем (soft delete).
+     * <p>
+     * При мягком удалении:
+     * <ul>
+     *   <li>Комментарий становится невидимым для публичных запросов</li>
+     *   <li>Остается в базе данных для администратора</li>
+     *   <li>Может быть восстановлен администратором при необходимости</li>
+     * </ul>
      *
-     * @param userId    ID пользователя
-     * @param commentId ID комментария
+     * <p>Процесс удаления:
+     * <ol>
+     *   <li>Проверяет существование комментария</li>
+     *   <li>Проверяет, что пользователь является автором</li>
+     *   <li>Устанавливает флаг isDeleted = true</li>
+     * </ol>
+     *
+     * @param userId    идентификатор пользователя (для проверки прав)
+     * @param commentId идентификатор удаляемого комментария
      * @throws NotFoundException  если комментарий не найден
-     * @throws ForbiddenException если пользователь не автор комментария
+     * @throws ForbiddenException если пользователь не является автором комментария
      */
     void deleteCommentByUser(Long userId, Long commentId);
 
     /**
-     * Получение комментариев к событию (публичный доступ)
+     * Получает список активных комментариев к событию с пагинацией и сортировкой.
+     * <p>
+     * Доступно всем пользователям без авторизации.
+     * Возвращает только комментарии с isDeleted = false.
      *
-     * @param eventId  ID события
-     * @param pageable параметры пагинации
-     * @return список комментариев
+     * <p>Сортировка возможна по любому полю комментария (по умолчанию - createdAt).
+     *
+     * @param eventId идентификатор события
+     * @param from    начальная позиция для пагинации (0-based)
+     * @param size    количество записей на странице
+     * @param sort    поле для сортировки (например, "createdAt", "text", "author.id")
+     * @return список комментариев события (только активные)
      * @throws NotFoundException если событие не найдено или не опубликовано
      */
-    List<CommentDto> getEventComments(Long eventId, Pageable pageable);
+    List<CommentDto> getEventComments(Long eventId, int from, int size, String sort);
 
     /**
-     * Получение конкретного комментария (публичный доступ)
+     * Получает конкретный комментарий по его идентификатору.
+     * <p>
+     * Доступно всем пользователям без авторизации.
+     * Возвращает комментарий только если он активен (isDeleted = false)
+     * и принадлежит указанному событию.
      *
-     * @param commentId ID комментария
+     * @param eventId   идентификатор события (для валидации)
+     * @param commentId идентификатор комментария
      * @return комментарий
-     * @throws NotFoundException если комментарий не найден или удален
+     * @throws NotFoundException если комментарий не найден, удален или не принадлежит событию
      */
-    CommentDto getComment(Long commentId);
+    CommentDto getComment(Long eventId, Long commentId);
 
     /**
-     * Получение всех комментариев пользователя (для администратора)
+     * Получает все комментарии пользователя (включая удаленные).
+     * <p>
+     * Доступно только администраторам.
+     * Используется для модерации и аудита.
      *
-     * @param userId   ID пользователя
-     * @param pageable параметры пагинации
-     * @return список комментариев (включая удаленные)
+     * <p>Возвращает все комментарии пользователя, включая помеченные как isDeleted = true.
+     *
+     * @param userId идентификатор пользователя
+     * @param from   начальная позиция для пагинации (0-based)
+     * @param size   количество записей на странице
+     * @param sort   поле для сортировки
+     * @return список всех комментариев пользователя
      * @throws NotFoundException если пользователь не найден
      */
-    List<CommentDto> getUserCommentsByAdmin(Long userId, Pageable pageable);
+    List<CommentDto> getUserCommentsByAdmin(Long userId, int from, int size, String sort);
 
     /**
-     * Удаление комментария администратором (hard delete)
+     * Жестко удаляет комментарий из базы данных (hard delete).
+     * <p>
+     * Доступно только администраторам.
+     * Комментарий полностью удаляется из БД и не может быть восстановлен.
+     * Отличается от мягкого удаления (soft delete) физическим удалением записи.
      *
-     * @param commentId ID комментария
+     * @param commentId идентификатор удаляемого комментария
      * @throws NotFoundException если комментарий не найден
      */
     void deleteCommentByAdmin(Long commentId);
 
     /**
-     * Получение всех комментариев события (для администратора)
+     * Получает все комментарии события (включая удаленные).
+     * <p>
+     * Доступно только администраторам.
+     * Используется для модерации контента и анализа активности.
      *
-     * @param eventId  ID события
-     * @param pageable параметры пагинации
-     * @return список комментариев (включая удаленные)
+     * <p>Возвращает все комментарии события, включая помеченные как isDeleted = true.
+     *
+     * @param eventId идентификатор события
+     * @param from    начальная позиция для пагинации (0-based)
+     * @param size    количество записей на странице
+     * @param sort    поле для сортировки
+     * @return список всех комментариев события
      * @throws NotFoundException если событие не найдено
      */
-    List<CommentDto> getEventCommentsByAdmin(Long eventId, Pageable pageable);
+    List<CommentDto> getEventCommentsByAdmin(Long eventId, int from, int size, String sort);
 }
