@@ -8,6 +8,186 @@
   },
   "item": [
     {
+      "name": "Private",
+      "item": [
+        {
+          "name": "Успешное создание комментария",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Код статуса ответа 200\", function() {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Ответ - объект\", function() {\r",
+                  "    pm.expect(pm.response.json()).to.be.an('object');\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Комментарий имеет обязательные поля\", function() {\r",
+                  "    const comment = pm.response.json();\r",
+                  "    pm.expect(comment).to.have.property('id');\r",
+                  "    pm.expect(comment).to.have.property('text');\r",
+                  "    pm.expect(comment).to.have.property('eventId');\r",
+                  "    pm.expect(comment).to.have.property('author');\r",
+                  "    pm.expect(comment.author).to.have.property('id');\r",
+                  "    pm.expect(comment.author).to.have.property('name');\r",
+                  "    pm.expect(comment).to.have.property('createdAt');\r",
+                  "    pm.expect(comment).to.have.property('isDeleted');\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Данные комментрия должны быть корректными\", function() {\r",
+                  "    const comment = pm.response.json();\r",
+                  "    pm.expect(comment.text).to.equal(\"Прекрасное событие, я очень рад присоединиться к нему\");\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"text\": \"Прекрасное событие, я очень рад присоединиться к нему\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/1/comments/events/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "1",
+                "comments",
+                "events",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Ошибка 400 при пустом тексте",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Код статуса ответа 400\", function() {\r",
+                  "    pm.response.to.have.status(400);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Тело ответа содержит информацию об ошибке\", function() {\r",
+                  "    const response = pm.response.json();\r",
+                  "    pm.expect(response).to.have.property('message');\r",
+                  "    pm.expect(response).to.have.property('reason');\r",
+                  "    pm.expect(response).to.have.property('status');\r",
+                  "    pm.expect(response.status).to.equal(\"BAD_REQUEST\");\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"text\": \"\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/1/comments/events/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "1",
+                "comments",
+                "events",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Ошибка 404 при несуществующем событии",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Код статуса ответа 404\", function() {\r",
+                  "    pm.response.to.have.status(404);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Тело ответа содержит информацию об ошибке\", function() {\r",
+                  "    const response = pm.response.json();\r",
+                  "    pm.expect(response).to.have.property('message');\r",
+                  "    pm.expect(response).to.have.property('reason');\r",
+                  "    pm.expect(response).to.have.property('status');\r",
+                  "    pm.expect(response.status).to.equal(\"NOT_FOUND\");\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"text\": \"Это событие не существует\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/1/comments/events/999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "1",
+                "comments",
+                "events",
+                "999"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
       "name": "Public",
       "item": [
         {
@@ -264,186 +444,6 @@
                 "events",
                 "1",
                 "comments",
-                "999"
-              ]
-            }
-          },
-          "response": []
-        }
-      ]
-    },
-    {
-      "name": "Private",
-      "item": [
-        {
-          "name": "Успешное создание комментария",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test(\"Код статуса ответа 200\", function() {\r",
-                  "    pm.response.to.have.status(200);\r",
-                  "});\r",
-                  "\r",
-                  "pm.test(\"Ответ - объект\", function() {\r",
-                  "    pm.expect(pm.response.json()).to.be.an('object');\r",
-                  "});\r",
-                  "\r",
-                  "pm.test(\"Комментарий имеет обязательные поля\", function() {\r",
-                  "    const comment = pm.response.json();\r",
-                  "    pm.expect(comment).to.have.property('id');\r",
-                  "    pm.expect(comment).to.have.property('text');\r",
-                  "    pm.expect(comment).to.have.property('eventId');\r",
-                  "    pm.expect(comment).to.have.property('author');\r",
-                  "    pm.expect(comment.author).to.have.property('id');\r",
-                  "    pm.expect(comment.author).to.have.property('name');\r",
-                  "    pm.expect(comment).to.have.property('createdAt');\r",
-                  "    pm.expect(comment).to.have.property('isDeleted');\r",
-                  "});\r",
-                  "\r",
-                  "pm.test(\"Данные комментрия должны быть корректными\", function() {\r",
-                  "    const comment = pm.response.json();\r",
-                  "    pm.expect(comment.text).to.equal(\"Прекрасное событие, я очень рад присоединиться к нему\");\r",
-                  "});"
-                ],
-                "type": "text/javascript",
-                "packages": {},
-                "requests": {}
-              }
-            }
-          ],
-          "request": {
-            "method": "POST",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\r\n    \"text\": \"Прекрасное событие, я очень рад присоединиться к нему\"\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{baseUrl}}/users/1/comments/events/1",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "users",
-                "1",
-                "comments",
-                "events",
-                "1"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Ошибка 400 при пустом тексте",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test(\"Код статуса ответа 400\", function() {\r",
-                  "    pm.response.to.have.status(400);\r",
-                  "});\r",
-                  "\r",
-                  "pm.test(\"Тело ответа содержит информацию об ошибке\", function() {\r",
-                  "    const response = pm.response.json();\r",
-                  "    pm.expect(response).to.have.property('message');\r",
-                  "    pm.expect(response).to.have.property('reason');\r",
-                  "    pm.expect(response).to.have.property('status');\r",
-                  "    pm.expect(response.status).to.equal(\"BAD_REQUEST\");\r",
-                  "});"
-                ],
-                "type": "text/javascript",
-                "packages": {},
-                "requests": {}
-              }
-            }
-          ],
-          "request": {
-            "method": "POST",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\r\n    \"text\": \"\"\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{baseUrl}}/users/1/comments/events/1",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "users",
-                "1",
-                "comments",
-                "events",
-                "1"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Ошибка 404 при несуществующем событии",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "exec": [
-                  "pm.test(\"Код статуса ответа 404\", function() {\r",
-                  "    pm.response.to.have.status(404);\r",
-                  "});\r",
-                  "\r",
-                  "pm.test(\"Тело ответа содержит информацию об ошибке\", function() {\r",
-                  "    const response = pm.response.json();\r",
-                  "    pm.expect(response).to.have.property('message');\r",
-                  "    pm.expect(response).to.have.property('reason');\r",
-                  "    pm.expect(response).to.have.property('status');\r",
-                  "    pm.expect(response.status).to.equal(\"NOT_FOUND\");\r",
-                  "});"
-                ],
-                "type": "text/javascript",
-                "packages": {},
-                "requests": {}
-              }
-            }
-          ],
-          "protocolProfileBehavior": {
-            "disableBodyPruning": true
-          },
-          "request": {
-            "method": "GET",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\r\n    \"text\": \"Это событие не существует\"\r\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{baseUrl}}/users/1/comments/events/999",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "users",
-                "1",
-                "comments",
-                "events",
                 "999"
               ]
             }
