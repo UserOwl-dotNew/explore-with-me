@@ -357,16 +357,16 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}/users/1/comments/events/1",
+              "raw": "{{baseUrl}}/users/{{userId}}/comments/events/{{eventId}}",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "users",
-                "1",
+                "{{userId}}",
                 "comments",
                 "events",
-                "1"
+                "{{eventId}}"
               ]
             }
           },
@@ -410,16 +410,16 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}/users/1/comments/events/1",
+              "raw": "{{baseUrl}}/users/{{userId}}/comments/events/{{eventId}}",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "users",
-                "1",
+                "{{userId}}",
                 "comments",
                 "events",
-                "1"
+                "{{eventId}}"
               ]
             }
           },
@@ -463,13 +463,13 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}/users/1/comments/events/999",
+              "raw": "{{baseUrl}}/users/{{userId}}/comments/events/999",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "users",
-                "1",
+                "{{userId}}",
                 "comments",
                 "events",
                 "999"
@@ -528,13 +528,13 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/events/1/comments",
+              "raw": "{{baseUrl}}/events/{{eventId}}/comments",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "events",
-                "1",
+                "{{eventId}}",
                 "comments"
               ]
             }
@@ -628,15 +628,15 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/events/1/comments/1",
+              "raw": "{{baseUrl}}/events/{{eventId}}/comments/{{commentId}}",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "events",
-                "1",
+                "{{eventId}}",
                 "comments",
-                "1"
+                "{{commentId}}"
               ]
             }
           },
@@ -680,13 +680,13 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/events/1/comments?from=0&size=2",
+              "raw": "{{baseUrl}}/events/{{eventId}}/comments?from=0&size=2",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "events",
-                "1",
+                "{{eventId}}",
                 "comments"
               ],
               "query": [
@@ -732,13 +732,13 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/events/1/comments/999",
+              "raw": "{{baseUrl}}/events/{{eventId}}/comments/999",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "events",
-                "1",
+                "{{eventId}}",
                 "comments",
                 "999"
               ]
