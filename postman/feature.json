@@ -241,8 +241,9 @@
                   "pm.test(\"Тело ответа содержит информацию об ошибке\", function() {\r",
                   "    const response = pm.response.json();\r",
                   "    pm.expect(response).to.have.property('message');\r",
+                  "    pm.expect(response).to.have.property('reason');\r",
                   "    pm.expect(response).to.have.property('status');\r",
-                  "    pm.expect(response.status).to.equal(404);\r",
+                  "    pm.expect(response.status).to.equal(\"NOT_FOUND\");\r",
                   "});"
                 ],
                 "type": "text/javascript",
@@ -354,8 +355,9 @@
                   "pm.test(\"Тело ответа содержит информацию об ошибке\", function() {\r",
                   "    const response = pm.response.json();\r",
                   "    pm.expect(response).to.have.property('message');\r",
+                  "    pm.expect(response).to.have.property('reason');\r",
                   "    pm.expect(response).to.have.property('status');\r",
-                  "    pm.expect(response.status).to.equal(400);\r",
+                  "    pm.expect(response.status).to.equal(\"BAD_REQUEST\");\r",
                   "});"
                 ],
                 "type": "text/javascript",
@@ -406,8 +408,9 @@
                   "pm.test(\"Тело ответа содержит информацию об ошибке\", function() {\r",
                   "    const response = pm.response.json();\r",
                   "    pm.expect(response).to.have.property('message');\r",
+                  "    pm.expect(response).to.have.property('reason');\r",
                   "    pm.expect(response).to.have.property('status');\r",
-                  "    pm.expect(response.status).to.equal(404);\r",
+                  "    pm.expect(response.status).to.equal(\"NOT_FOUND\");\r",
                   "});"
                 ],
                 "type": "text/javascript",
