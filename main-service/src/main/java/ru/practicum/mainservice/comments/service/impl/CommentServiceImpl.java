@@ -43,7 +43,7 @@ public class CommentServiceImpl implements CommentService {
     public CommentDto createComment(Long userId, Long eventId, NewCommentDto dto) {
         User author = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь с id= " + userId + " не найден")
-        );
+                );
 
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException(

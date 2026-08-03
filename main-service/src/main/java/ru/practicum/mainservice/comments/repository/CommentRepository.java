@@ -15,7 +15,7 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     /**
      * Получение неудалённых комментариев события.
      *
-     * @param eventId идентификатор события
+     * @param eventId  идентификатор события
      * @param pageable параметры пагинации и сортировки
      * @return страница неудалённых комментариев
      */
@@ -47,7 +47,7 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
     /**
      * Получение всех комментариев события, включая удалённые.
      *
-     * @param eventId идентификатор события
+     * @param eventId  идентификатор события
      * @param pageable параметры пагинации и сортировки
      * @return страница комментариев события
      */

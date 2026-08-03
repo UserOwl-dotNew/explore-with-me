@@ -1,17 +1,12 @@
 package ru.practicum.mainservice.comments.mapper;
 
-import org.mapstruct.BeanMapping;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
-import org.mapstruct.NullValuePropertyMappingStrategy;
+import org.mapstruct.*;
 import ru.practicum.common.dto.CommentDto;
 import ru.practicum.common.dto.NewCommentDto;
 import ru.practicum.common.dto.UpdateCommentDto;
 import ru.practicum.common.entity.User;
 import ru.practicum.mainservice.comments.entity.Comment;
 import ru.practicum.mainservice.events.entity.Event;
-import ru.practicum.mainservice.users.mapper.UserMapper;
 
 import java.util.List;
 
