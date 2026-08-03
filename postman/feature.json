@@ -1,0 +1,459 @@
+{
+  "info": {
+    "_postman_id": "902cd7e2-eedf-43c0-8037-3b563a8d022b",
+    "name": "Comments Feature Tests",
+    "description": "# Тесты для функциональности комментариев",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "38487606"
+  },
+  "item": [
+    {
+      "name": "Public",
+      "item": [
+        {
+          "name": "Успешное получение комментариев",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Код статуса ответа 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Ответ - массив\", function() {\r",
+                  "    pm.expect(pm.response.json()).to.be.an('array');\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Комментарий имеет обязательные поля\", function() {\r",
+                  "    const comment = pm.response.json()[0];\r",
+                  "    pm.expect(comment).to.have.property('id');\r",
+                  "    pm.expect(comment).to.have.property('text');\r",
+                  "    pm.expect(comment).to.have.property('eventId');\r",
+                  "    pm.expect(comment).to.have.property('author');\r",
+                  "    pm.expect(comment.author).to.have.property('id');\r",
+                  "    pm.expect(comment.author).to.have.property('name');\r",
+                  "    pm.expect(comment).to.have.property('createdAt');\r",
+                  "    pm.expect(comment).to.have.property('isDeleted');\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Данные комментария должен быть корректными\", function() {\r",
+                  "    const comment = pm.response.json()[0];\r",
+                  "    pm.expect(comment.id).to.equal(1);\r",
+                  "    pm.expect(comment.text).to.equal(\"Wow, so beautiful!!!\");\r",
+                  "    pm.expect(comment.eventId).to.equal(1);\r",
+                  "    pm.expect(comment.isDeleted).to.equal(false);\r",
+                  "})"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/events/1/comments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "events",
+                "1",
+                "comments"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Пустой список при отсутствии комментариев",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Код статуса ответа 200\", function() {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Ответ - пустой массив\", function() {\r",
+                  "    pm.expect(pm.response.json()).to.be.an('array');\r",
+                  "    pm.expect(pm.response.json().length).to.equal(0);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/events/999/comments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "events",
+                "999",
+                "comments"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Успешное получение комментария",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Код статуса ответа 200\", function() {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Ответ - объект\", function() {\r",
+                  "    pm.expect(pm.response.json()).to.be.an('object');\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Комментарий имеет обязательные поля\", function() {\r",
+                  "    const comment = pm.response.json();\r",
+                  "    pm.expect(comment).to.have.property('id');\r",
+                  "    pm.expect(comment).to.have.property('text');\r",
+                  "    pm.expect(comment).to.have.property('eventId');\r",
+                  "    pm.expect(comment).to.have.property('author');\r",
+                  "    pm.expect(comment.author).to.have.property('id');\r",
+                  "    pm.expect(comment.author).to.have.property('name');\r",
+                  "    pm.expect(comment).to.have.property('createdAt');\r",
+                  "    pm.expect(comment).to.have.property('isDeleted');\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Данные комментрия должны быть корректными\", function() {\r",
+                  "    const comment = pm.response.json();\r",
+                  "    pm.expect(comment.id).to.equal(1);\r",
+                  "    pm.expect(comment.text).to.equal(\"Wow, so beautiful!!!\");\r",
+                  "    pm.expect(comment.eventId).to.equal(1);\r",
+                  "    pm.expect(comment.isDeleted).to.equal(false);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/events/1/comments/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "events",
+                "1",
+                "comments",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Пагинация работает корректно",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Код статуса ответа 200\", function() {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Ответ - массив\", function() {\r",
+                  "    pm.expect(pm.response.json()).to.be.an('array');\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Количество элементов в массиве 2 или меньше\", function() {\r",
+                  "    pm.expect(pm.response.json().length).to.be.at.most(2);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Элементы отсортированы по дате\", function() {\r",
+                  "    const comments = pm.response.json();\r",
+                  "    if (comments.length > 1) {\r",
+                  "        const firstDate = new Date(comments[0].createdAt);\r",
+                  "        const secondDate = new Date(comments[1].createdAt);\r",
+                  "        pm.expect(firstDate.getTime()).to.be.at.least(secondDate.getTime());\r",
+                  "    }\r",
+                  "})"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/events/1/comments?from=0&size=2",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "events",
+                "1",
+                "comments"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "2"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Ошибка 404 при несуществующем комментарии",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Код статуса ответа 404\", function() {\r",
+                  "    pm.response.to.have.status(404);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Тело ответа содержит информацию об ошибке\", function() {\r",
+                  "    const response = pm.response.json();\r",
+                  "    pm.expect(response).to.have.property('message');\r",
+                  "    pm.expect(response).to.have.property('status');\r",
+                  "    pm.expect(response.status).to.equal(404);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/events/1/comments/999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "events",
+                "1",
+                "comments",
+                "999"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Private",
+      "item": [
+        {
+          "name": "Успешное создание комментария",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Код статуса ответа 200\", function() {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Ответ - объект\", function() {\r",
+                  "    pm.expect(pm.response.json()).to.be.an('object');\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Комментарий имеет обязательные поля\", function() {\r",
+                  "    const comment = pm.response.json();\r",
+                  "    pm.expect(comment).to.have.property('id');\r",
+                  "    pm.expect(comment).to.have.property('text');\r",
+                  "    pm.expect(comment).to.have.property('eventId');\r",
+                  "    pm.expect(comment).to.have.property('author');\r",
+                  "    pm.expect(comment.author).to.have.property('id');\r",
+                  "    pm.expect(comment.author).to.have.property('name');\r",
+                  "    pm.expect(comment).to.have.property('createdAt');\r",
+                  "    pm.expect(comment).to.have.property('isDeleted');\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Данные комментрия должны быть корректными\", function() {\r",
+                  "    const comment = pm.response.json();\r",
+                  "    pm.expect(comment.text).to.equal(\"Прекрасное событие, я очень рад присоединиться к нему\");\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"text\": \"Прекрасное событие, я очень рад присоединиться к нему\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/1/comments/events/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "1",
+                "comments",
+                "events",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Ошибка 400 при пустом тексте",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Код статуса ответа 400\", function() {\r",
+                  "    pm.response.to.have.status(400);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Тело ответа содержит информацию об ошибке\", function() {\r",
+                  "    const response = pm.response.json();\r",
+                  "    pm.expect(response).to.have.property('message');\r",
+                  "    pm.expect(response).to.have.property('status');\r",
+                  "    pm.expect(response.status).to.equal(400);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"text\": \"\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/1/comments/events/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "1",
+                "comments",
+                "events",
+                "1"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Ошибка 404 при несуществующем событии",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Код статуса ответа 404\", function() {\r",
+                  "    pm.response.to.have.status(404);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Тело ответа содержит информацию об ошибке\", function() {\r",
+                  "    const response = pm.response.json();\r",
+                  "    pm.expect(response).to.have.property('message');\r",
+                  "    pm.expect(response).to.have.property('status');\r",
+                  "    pm.expect(response.status).to.equal(404);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "protocolProfileBehavior": {
+            "disableBodyPruning": true
+          },
+          "request": {
+            "method": "GET",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"text\": \"Это событие не существует\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/1/comments/events/999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "1",
+                "comments",
+                "events",
+                "999"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": ""
+    }
+  ]
+}
