@@ -2,6 +2,7 @@ package ru.practicum.mainservice.controller.api.comment;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
+import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.common.dto.CommentDto;
@@ -66,6 +67,7 @@ public interface PrivateCommentControllerApi {
      * @param commentId идентификатор комментария (из пути)
      */
     @DeleteMapping("/{commentId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     void deleteComment(
             @PathVariable @Positive Long userId,
             @PathVariable @Positive Long commentId

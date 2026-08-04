@@ -1,10 +1,11 @@
 {
   "info": {
-    "_postman_id": "19c62ec2-2b9a-43f0-bee6-921c4d20f974",
+    "_postman_id": "d8e6e604-e83b-461a-893c-776d19fc1afa",
     "name": "Comments Feature Tests Copy",
     "description": "# Тесты для функциональности комментариев",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "_exporter_id": "38487606"
+    "_exporter_id": "51191683",
+    "_collection_link": "https://go.postman.co/collection/51191683-d8e6e604-e83b-461a-893c-776d19fc1afa?source=collection_link"
   },
   "item": [
     {
@@ -295,6 +296,172 @@
             }
           },
           "response": []
+        },
+        {
+          "name": "Создание неопубликованного события",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Событие создано - статус 201\", function () {\r",
+                  "    pm.response.to.have.status(201);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Сохраняем eventId в переменную\", function () {\r",
+                  "    const response = pm.response.json();\r",
+                  "    pm.environment.set(\"unpublishedEventId\", response.id);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"annotation\": \"Test annotation for comments\",\r\n    \"category\": {{categoryId}},\r\n    \"description\": \"Test description for events\",\r\n    \"eventDate\": \"2026-12-31 23:59:59\",\r\n    \"location\": {\r\n        \"lat\": 47.222,\r\n        \"lon\": 39.718\r\n    },\r\n    \"paid\": false,\r\n    \"participantLimit\": 10,\r\n    \"requestModeration\": true,\r\n    \"title\": \"Test Event for Comments\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/{{userId}}/events",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "{{userId}}",
+                "events"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Создание чужого пользователя",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Пользователь создан - статус 201\", function () {\r",
+                  "    pm.response.to.have.status(201);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Сохраняем userId в переменную\", function () {\r",
+                  "    const response = pm.response.json();\r",
+                  "    pm.environment.set(\"otherUserId\", response.id);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"name\": \"TestOtherUser\",\r\n    \"email\": \"testotheruser@example.com\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/admin/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "users"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Создание удаляемого комментария",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Код статуса ответа 200\", function() {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Ответ - объект\", function() {\r",
+                  "    pm.expect(pm.response.json()).to.be.an('object');\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Комментарий имеет обязательные поля\", function() {\r",
+                  "    const comment = pm.response.json();\r",
+                  "    pm.expect(comment).to.have.property('id');\r",
+                  "    pm.expect(comment).to.have.property('text');\r",
+                  "    pm.expect(comment).to.have.property('eventId');\r",
+                  "    pm.expect(comment).to.have.property('author');\r",
+                  "    pm.expect(comment.author).to.have.property('id');\r",
+                  "    pm.expect(comment.author).to.have.property('name');\r",
+                  "    pm.expect(comment).to.have.property('createdAt');\r",
+                  "    pm.expect(comment).to.have.property('isDeleted');\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Данные комментрия должны быть корректными\", function() {\r",
+                  "    const comment = pm.response.json();\r",
+                  "    pm.expect(comment.text).to.equal(\"Deleted text\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Сохраняем commentId в переменную\", function () {\r",
+                  "    const response = pm.response.json();\r",
+                  "    pm.environment.set(\"deletedCommentId\", response.id);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"text\": \"Deleted text\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/{{userId}}/comments/events/{{eventId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "{{userId}}",
+                "comments",
+                "events",
+                "{{eventId}}"
+              ]
+            }
+          },
+          "response": []
         }
       ]
     },
@@ -473,6 +640,440 @@
                 "comments",
                 "events",
                 "999"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Ошибка 404 при несуществующем пользователе",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Статус ответа - 404 Not Found\", function() {\r",
+                  "    pm.response.to.have.status(404);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Ответ содержит JSON\", function () {\r",
+                  "    pm.expect(pm.response.headers.get(\"Content-Type\"))\r",
+                  "    .to.include(\"application/json\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Ответ содержит описание ошибки\", function () {\r",
+                  "    const body = pm.response.json();\r",
+                  "\r",
+                  "    pm.expect(body).to.be.an(\"object\");\r",
+                  "\r",
+                  "    const message =\r",
+                  "        body.message ||\r",
+                  "        body.reason ||\r",
+                  "        body.error ||\r",
+                  "        body.description;\r",
+                  "\r",
+                  "    pm.expect(message, \"Описание ошибки отсутствует\")\r",
+                  "        .to.be.a(\"string\")\r",
+                  "        .and.not.empty;\r",
+                  "});\r",
+                  "\r",
+                  ""
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"text\": \"Comment text\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/999/comments/events/{{eventId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "999",
+                "comments",
+                "events",
+                "{{eventId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Ошибка 409 при комментарии к неопубликованному событию",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Статус ответа — 409 Conflict\", function () {\r",
+                  "    pm.response.to.have.status(409);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Ответ содержит JSON\", function () {\r",
+                  "    pm.expect(pm.response.headers.get(\"Content-Type\"))\r",
+                  "        .to.include(\"application/json\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Ответ содержит описание конфликта\", function () {\r",
+                  "    const body = pm.response.json();\r",
+                  "\r",
+                  "    pm.expect(body).to.be.an(\"object\");\r",
+                  "\r",
+                  "    const message =\r",
+                  "        body.message ||\r",
+                  "        body.reason ||\r",
+                  "        body.error ||\r",
+                  "        body.description;\r",
+                  "\r",
+                  "    pm.expect(message, \"Описание ошибки отсутствует\")\r",
+                  "        .to.be.a(\"string\")\r",
+                  "        .and.not.empty;\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"text\": \"Comment text\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/{{userId}}/comments/events/{{unpublishedEventId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "{{userId}}",
+                "comments",
+                "events",
+                "{{unpublishedEventId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Успешное обновление комментария",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Статус ответа — 200 OK\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Ответ содержит JSON\", function () {\r",
+                  "    pm.expect(pm.response.headers.get(\"Content-Type\"))\r",
+                  "        .to.include(\"application/json\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Возвращён обновлённый комментарий\", function () {\r",
+                  "    const body = pm.response.json();\r",
+                  "    const requestBody = JSON.parse(pm.request.body.raw);\r",
+                  "\r",
+                  "    const commentId = Number(pm.environment.get(\"commentId\"));\r",
+                  "\r",
+                  "    pm.expect(body).to.be.an(\"object\");\r",
+                  "    pm.expect(body.id).to.eql(commentId);\r",
+                  "    pm.expect(body.text).to.eql(requestBody.text);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Автор комментария не изменился\", function () {\r",
+                  "    const body = pm.response.json();\r",
+                  "\r",
+                  "    const userId = Number(pm.environment.get(\"userId\"));\r",
+                  "\r",
+                  "    pm.expect(body.author).to.be.an(\"object\");\r",
+                  "    pm.expect(body.author.id).to.eql(userId);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Дата обновления заполнена\", function () {\r",
+                  "    const body = pm.response.json();\r",
+                  "\r",
+                  "    pm.expect(body.updatedAt).to.be.a(\"string\").and.not.empty;\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n  \"text\": \"Прекрасное событие, я очень рад присоединиться к нему\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/{{userId}}/comments/{{commentId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "{{userId}}",
+                "comments",
+                "{{commentId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Ошибка 403 при обновлении чужого комментария",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Статус ответа — 403 Forbidden\", function () {\r",
+                  "    pm.response.to.have.status(403);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Ответ содержит JSON\", function () {\r",
+                  "    pm.expect(pm.response.headers.get(\"Content-Type\"))\r",
+                  "        .to.include(\"application/json\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Ответ содержит описание запрета\", function () {\r",
+                  "    const body = pm.response.json();\r",
+                  "\r",
+                  "    pm.expect(body).to.be.an(\"object\");\r",
+                  "\r",
+                  "    const message =\r",
+                  "        body.message ||\r",
+                  "        body.reason ||\r",
+                  "        body.error ||\r",
+                  "        body.description;\r",
+                  "\r",
+                  "    pm.expect(message, \"Описание ошибки отсутствует\")\r",
+                  "        .to.be.a(\"string\")\r",
+                  "        .and.not.empty;\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"text\": \"Foreign comment text\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/{{otherUserId}}/comments/{{commentId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "{{otherUserId}}",
+                "comments",
+                "{{commentId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Ошибка 404 при несуществующем комментарии",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Статус ответа — 404 Not Found\", function () {\r",
+                  "    pm.response.to.have.status(404);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Ответ содержит JSON\", function () {\r",
+                  "    pm.expect(pm.response.headers.get(\"Content-Type\"))\r",
+                  "        .to.include(\"application/json\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Ответ содержит описание ошибки\", function () {\r",
+                  "    const body = pm.response.json();\r",
+                  "\r",
+                  "    pm.expect(body).to.be.an(\"object\");\r",
+                  "\r",
+                  "    const message =\r",
+                  "        body.message ||\r",
+                  "        body.reason ||\r",
+                  "        body.error ||\r",
+                  "        body.description;\r",
+                  "\r",
+                  "    pm.expect(message, \"Описание ошибки отсутствует\")\r",
+                  "        .to.be.a(\"string\")\r",
+                  "        .and.not.empty;\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\r\n    \"text\": \"Comment text\"\r\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/{{userId}}/comments/999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "{{userId}}",
+                "comments",
+                "999"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Ошибка 403 при удалении чужого комментария",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Статус ответа — 403 Forbidden\", function () {\r",
+                  "    pm.response.to.have.status(403);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Ответ содержит JSON\", function () {\r",
+                  "    pm.expect(pm.response.headers.get(\"Content-Type\"))\r",
+                  "        .to.include(\"application/json\");\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Ответ содержит описание запрета\", function () {\r",
+                  "    const body = pm.response.json();\r",
+                  "\r",
+                  "    pm.expect(body).to.be.an(\"object\");\r",
+                  "\r",
+                  "    const message =\r",
+                  "        body.message ||\r",
+                  "        body.reason ||\r",
+                  "        body.error ||\r",
+                  "        body.description;\r",
+                  "\r",
+                  "    pm.expect(message, \"Описание ошибки отсутствует\")\r",
+                  "        .to.be.a(\"string\")\r",
+                  "        .and.not.empty;\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/{{otherUserId}}/comments/{{commentId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "{{otherUserId}}",
+                "comments",
+                "{{commentId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Успешное удаление комментария (soft delete)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Статус ответа — 204 No Content\", function () {\r",
+                  "    pm.response.to.have.status(204);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Тело ответа отсутствует\", function () {\r",
+                  "    pm.expect(pm.response.text()).to.be.empty;\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/{{userId}}/comments/{{deletedCommentId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "{{userId}}",
+                "comments",
+                "{{deletedCommentId}}"
               ]
             }
           },
