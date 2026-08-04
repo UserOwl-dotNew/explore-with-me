@@ -121,7 +121,7 @@ public class AdminCommentControllerTest {
         doNothing().when(service).deleteCommentByAdmin(eq(commentId));
 
         mvc.perform(delete("/admin/comments/{commentId}", commentId))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
     }
 
     @Test

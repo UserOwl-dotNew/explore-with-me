@@ -204,7 +204,7 @@ public class PrivateCommentControllerTest {
         doNothing().when(service).deleteCommentByUser(eq(userId), eq(commentId));
 
         mvc.perform(delete("/users/{userId}/comments/{commentId}", userId, commentId))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
     }
 
     @Test
