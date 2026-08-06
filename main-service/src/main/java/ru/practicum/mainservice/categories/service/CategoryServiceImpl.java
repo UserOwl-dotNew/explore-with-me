@@ -49,16 +49,19 @@ public class CategoryServiceImpl implements CategoryService {
     public CategoryDto updateCategory(Long catId, CategoryDto dto) {
         log.info("Updating category with id: {}", catId);
 
-        Category category = getCategoryEntity(catId);
+        Category category = categoryRepository.findById(catId)
+                .orElseThrow(() -> new NotFoundException("Category not found"));
 
-        try {
-            category.setName(dto.getName());
-            category = categoryRepository.save(category);
-            log.info("Updated category with id: {}", catId);
-            return categoryMapper.toDto(category);
-        } catch (DataIntegrityViolationException e) {
-            throw new ConflictException("Category with name '" + dto.getName() + "' already exists");
-        }
+        categoryRepository.findByName(dto.getName())
+                .ifPresent(existing -> {
+                    if (!existing.getId().equals(catId)) {
+                        throw new ConflictException("Category with name '" + dto.getName() + "' already exists");
+                    }
+                });
+
+        category.setName(dto.getName());
+        category = categoryRepository.save(category);
+        return categoryMapper.toDto(category);
     }
 
     @Override

@@ -11,10 +11,11 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import ru.practicum.common.dto.EventShortDto;
 import ru.practicum.common.dto.LocationDto;
 import ru.practicum.common.enums.EventState;
+import ru.practicum.mainservice.controller.PrivateEventController;
 import ru.practicum.mainservice.events.dto.EventFullDto;
-import ru.practicum.mainservice.events.dto.EventShortDto;
 import ru.practicum.mainservice.events.dto.NewEventDto;
 import ru.practicum.mainservice.events.dto.UpdateEventUserRequest;
 import ru.practicum.mainservice.events.service.EventService;
@@ -76,7 +77,7 @@ public class PrivateEventControllerTest {
         mockMvc.perform(post("/users/{userId}/events", userId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dto)))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(1L))
                 .andExpect(jsonPath("$.annotation").value("Test annotation need more simbols"));
     }

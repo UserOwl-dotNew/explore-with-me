@@ -9,14 +9,14 @@ import ru.practicum.common.enums.EventState;
 import ru.practicum.common.enums.RequestStatus;
 import ru.practicum.common.exception.ConflictException;
 import ru.practicum.common.exception.NotFoundException;
+import ru.practicum.mainservice.events.entity.Event;
+import ru.practicum.mainservice.events.service.EventService;
 import ru.practicum.mainservice.requests.dto.EventRequestStatusUpdateRequest;
 import ru.practicum.mainservice.requests.dto.EventRequestStatusUpdateResult;
 import ru.practicum.mainservice.requests.dto.ParticipationRequestDto;
 import ru.practicum.mainservice.requests.entity.ParticipationRequest;
 import ru.practicum.mainservice.requests.repository.ParticipationRequestRepository;
-import ru.practicum.mainservice.events.service.EventService;
 import ru.practicum.mainservice.requests.service.ParticipationRequestService;
-import ru.practicum.mainservice.events.entity.Event;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
 public class ParticipationRequestServiceImpl implements ParticipationRequestService {
 
     private final ParticipationRequestRepository requestRepository;
-    private final EventService eventService; // пока заглушка, позже реальный
+    private final EventService eventService;
 
     private ParticipationRequestDto toDto(ParticipationRequest request) {
         return new ParticipationRequestDto(
@@ -55,7 +55,7 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
     public ParticipationRequestDto addRequest(Long userId, Long eventId) {
         Event event = eventService.getEventEntity(eventId);
 
-        if (!EventState.PUBLISHED.name().equals(event.getState())) {
+        if (event.getState() != EventState.PUBLISHED) {
             throw new ConflictException("Нельзя участвовать в неопубликованном событии");
         }
         if (event.getInitiator().getId().equals(userId)) {

@@ -6,19 +6,37 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
+/**
+ * DTO для передачи информации об ошибке в ответе API.
+ * Содержит детали ошибки, статус и временную метку.
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class ApiError {
+
     /**
-     * Сведения об ошибке
+     * Список ошибок или стектрейсов (опционально).
      */
     private List<String> errors;
-    private String message;
-    private String reason;
-    private String status;
+
     /**
-     * Дата в формате yyyy-MM-dd HH:mm:ss
+     * Сообщение об ошибке.
+     */
+    private String message;
+
+    /**
+     * Краткое описание причины ошибки.
+     */
+    private String reason;
+
+    /**
+     * Код статуса HTTP-ответа (например, "BAD_REQUEST", "NOT_FOUND").
+     */
+    private String status;
+
+    /**
+     * Дата и время возникновения ошибки в формате "yyyy-MM-dd HH:mm:ss".
      */
     private String timestamp;
 }

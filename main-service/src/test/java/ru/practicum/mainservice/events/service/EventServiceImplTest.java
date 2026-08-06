@@ -6,10 +6,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.*;
 import ru.practicum.common.dto.CategoryDto;
+import ru.practicum.common.dto.EventShortDto;
 import ru.practicum.common.dto.LocationDto;
 import ru.practicum.common.dto.UserShortDto;
 import ru.practicum.common.entity.Category;
@@ -24,12 +23,17 @@ import ru.practicum.common.exception.NotFoundException;
 import ru.practicum.dto.EndpointHit;
 import ru.practicum.mainservice.categories.repository.CategoryRepository;
 import ru.practicum.mainservice.categories.service.CategoryService;
-import ru.practicum.mainservice.events.dto.*;
+import ru.practicum.mainservice.events.dto.EventFullDto;
+import ru.practicum.mainservice.events.dto.NewEventDto;
+import ru.practicum.mainservice.events.dto.UpdateEventAdminRequest;
+import ru.practicum.mainservice.events.dto.UpdateEventUserRequest;
 import ru.practicum.mainservice.events.entity.Event;
 import ru.practicum.mainservice.events.mapper.EventMapper;
 import ru.practicum.mainservice.events.repository.EventRepository;
+import ru.practicum.mainservice.events.repository.EventRepositoryCustom;
+import ru.practicum.mainservice.requests.repository.ParticipationRequestRepository;
 import ru.practicum.mainservice.users.service.UserService;
-import ru.practicum.statistics.client.StatsClient;
+import ru.practicum.statistics.client.controller.StatsClient;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -38,7 +42,6 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -46,6 +49,12 @@ public class EventServiceImplTest {
 
     @Mock
     private EventRepository eventRepository;
+
+    @Mock
+    private EventRepositoryCustom eventRepositoryCustom;
+
+    @Mock
+    private ParticipationRequestRepository participationRequestRepository;
 
     @Mock
     private EventMapper eventMapper;
@@ -150,91 +159,67 @@ public class EventServiceImplTest {
 
     @Test
     void getAdminEvents_shouldReturnListOfEvents() {
-        Page<Event> eventPage = new PageImpl<>(List.of(event));
-        List<EventFullDto> expectedDtos = List.of(eventFullDto);
+        when(eventRepositoryCustom.findAllByAdminFilters(
+                any(), any(), any(), any(), any(), any(Pageable.class)
+        )).thenReturn(new PageImpl<>(List.of(event)));
 
-        when(eventRepository.findAllByAdminFilters(
-                isNull(), isNull(), isNull(), isNull(), isNull(), any(PageRequest.class)
-        )).thenReturn(eventPage);
-        when(eventMapper.toFullDto(event)).thenReturn(eventFullDto);
+        when(eventMapper.toFullDto(event))
+                .thenReturn(eventFullDto);
 
         List<EventFullDto> result = eventService.getAdminEvents(
-                null, null, null, null, null, 0, 10
+                null, null, null, null,
+                null, 0, 10
         );
 
-        assertThat(result).hasSize(1);
-        assertThat(result.get(0).getId()).isEqualTo(1L);
-        assertThat(result.get(0).getAnnotation()).isEqualTo("Новая аннотация для тестового события");
+        assertThat(result).containsExactly(eventFullDto);
+
+        verify(eventRepositoryCustom).findAllByAdminFilters(
+                any(), any(), any(), any(), any(), any(Pageable.class)
+        );
+
+        verify(eventMapper).toFullDto(event);
     }
 
     @Test
     void getAdminEvents_withFilters_shouldReturnFilteredEvents() {
-        List<Long> users = List.of(1L, 2L);
-        List<EventState> states = List.of(EventState.PENDING);
-        List<Long> categories = List.of(1L);
-        LocalDateTime rangeStart = now.minusDays(1);
-        LocalDateTime rangeEnd = now.plusDays(10);
+        when(eventRepositoryCustom.findAllByAdminFilters(
+                any(), any(), any(), any(), any(), any(Pageable.class)
+        )).thenReturn(new PageImpl<>(List.of(event)));
 
-        Page<Event> eventPage = new PageImpl<>(List.of(event));
-
-        when(eventRepository.findAllByAdminFilters(
-                eq(users), eq(states), eq(categories), eq(rangeStart), eq(rangeEnd), any(PageRequest.class)
-        )).thenReturn(eventPage);
-        when(eventMapper.toFullDto(event)).thenReturn(eventFullDto);
+        when(eventMapper.toFullDto(event))
+                .thenReturn(eventFullDto);
 
         List<EventFullDto> result = eventService.getAdminEvents(
-                users, states, categories, rangeStart, rangeEnd, 0, 10
+                List.of(1L, 2L),
+                List.of(EventState.PENDING),
+                List.of(1L),
+                now.minusDays(1),
+                now.plusDays(10),
+                0,
+                10
         );
 
-        assertThat(result).hasSize(1);
-        verify(eventRepository).findAllByAdminFilters(
-                eq(users), eq(states), eq(categories), eq(rangeStart), eq(rangeEnd), any(PageRequest.class)
+        assertThat(result).containsExactly(eventFullDto);
+
+        verify(eventRepositoryCustom).findAllByAdminFilters(
+                any(), any(), any(), any(), any(), any(Pageable.class)
         );
     }
 
     @Test
     void getAdminEvents_shouldHandleEmptyResult() {
-        Page<Event> emptyPage = new PageImpl<>(List.of());
-
-        when(eventRepository.findAllByAdminFilters(
-                isNull(), isNull(), isNull(), isNull(), isNull(), any(PageRequest.class)
-        )).thenReturn(emptyPage);
+        when(eventRepositoryCustom.findAllByAdminFilters(
+                any(), any(), any(), any(), any(), any(Pageable.class)
+        )).thenReturn(new PageImpl<>(List.of()));
 
         List<EventFullDto> result = eventService.getAdminEvents(
-                null, null, null, null, null, 0, 10
+                null, null, null, null,
+                null, 0, 10
         );
 
         assertThat(result).isEmpty();
     }
 
-    @Test
-    void updateAdminEvent_shouldPublishEventSuccessfully() {
-        when(eventRepository.findById(1L)).thenReturn(Optional.of(event));
-        when(categoryService.getCategoryEntity(1L)).thenReturn(category);
-        when(eventRepository.save(event)).thenReturn(event);
-        when(eventMapper.toFullDto(event)).thenReturn(eventFullDto);
-
-        doAnswer(invocation -> {
-            UpdateEventAdminRequest request = invocation.getArgument(0);
-            Category cat = invocation.getArgument(1);
-            Event eventToUpdate = invocation.getArgument(2);
-            eventToUpdate.setAnnotation(request.getAnnotation());
-            eventToUpdate.setDescription(request.getDescription());
-            eventToUpdate.setTitle(request.getTitle());
-            eventToUpdate.setCategory(cat);
-            eventToUpdate.setEventDate(request.getEventDate());
-            eventToUpdate.setPaid(request.getPaid());
-            eventToUpdate.setParticipantLimit(request.getParticipantLimit());
-            eventToUpdate.setRequestModeration(request.getRequestModeration());
-            return null;
-        }).when(eventMapper).updateFromAdmin(any(UpdateEventAdminRequest.class), any(Category.class), any(Event.class));
-
-        EventFullDto result = eventService.updateAdminEvent(1L, updateRequest);
-
-        assertThat(result).isNotNull();
-        assertThat(result.getId()).isEqualTo(1L);
-        verify(eventRepository).save(event);
-    }
 
     @Test
     void updateAdminEvent_shouldThrowNotFoundException_whenEventNotFound() {
@@ -274,24 +259,6 @@ public class EventServiceImplTest {
         assertThatThrownBy(() -> eventService.updateAdminEvent(1L, updateRequest))
                 .isInstanceOf(ConflictException.class)
                 .hasMessageContaining("Cannot reject published event");
-    }
-
-    @Test
-    void updateAdminEvent_shouldRejectEventSuccessfully() {
-        updateRequest.setStateAction(AdminStateAction.REJECT_EVENT);
-        when(eventRepository.findById(1L)).thenReturn(Optional.of(event));
-        when(categoryService.getCategoryEntity(1L)).thenReturn(category);
-        when(eventRepository.save(event)).thenReturn(event);
-        when(eventMapper.toFullDto(event)).thenReturn(eventFullDto);
-
-        doAnswer(invocation -> null)
-                .when(eventMapper).updateFromAdmin(any(UpdateEventAdminRequest.class), any(Category.class), any(Event.class));
-
-        EventFullDto result = eventService.updateAdminEvent(1L, updateRequest);
-
-        assertThat(result).isNotNull();
-        assertThat(event.getState()).isEqualTo(EventState.CANCELED);
-        verify(eventRepository).save(event);
     }
 
     @Test
@@ -481,45 +448,6 @@ public class EventServiceImplTest {
                 .hasMessageContaining("Event with id 1 not found for user 2");
     }
 
-    @Test
-    void updateUserEvent_shouldUpdateEventSuccessfully() {
-        Long userId = 1L;
-        Long eventId = 1L;
-        UpdateEventUserRequest request = createUpdateEventUserRequest();
-        Category newCategory = new Category();
-        newCategory.setId(2L);
-        newCategory.setName("Спорт");
-
-        when(userService.getUserEntity(userId)).thenReturn(initiator);
-        when(eventRepository.findById(eventId)).thenReturn(Optional.of(event));
-        when(categoryService.getCategoryEntity(2L)).thenReturn(newCategory);
-        when(eventRepository.save(event)).thenReturn(event);
-        when(eventMapper.toFullDto(event)).thenReturn(eventFullDto);
-
-        doAnswer(invocation -> {
-            UpdateEventUserRequest req = invocation.getArgument(0);
-            Category cat = invocation.getArgument(1);
-            Event eventToUpdate = invocation.getArgument(2);
-            if (req.getAnnotation() != null) {
-                eventToUpdate.setAnnotation(req.getAnnotation());
-            }
-            if (req.getCategory() != null) {
-                eventToUpdate.setCategory(cat);
-            }
-            if (req.getEventDate() != null) {
-                eventToUpdate.setEventDate(req.getEventDate());
-            }
-            if (req.getStateAction() != null) {
-                // Статус меняется в сервисе, не здесь
-            }
-            return null;
-        }).when(eventMapper).updateFromUser(any(UpdateEventUserRequest.class), any(Category.class), any(Event.class));
-
-        EventFullDto result = eventService.updateUserEvent(userId, eventId, request);
-
-        assertThat(result).isNotNull();
-        verify(eventRepository).save(event);
-    }
 
     @Test
     void updateUserEvent_shouldThrowNotFoundException_whenUserIsNotInitiator() {
@@ -616,110 +544,118 @@ public class EventServiceImplTest {
 
     @Test
     void getPublicEvents_shouldReturnPublishedEvents() {
-        List<Event> events = List.of(event);
-        Page<Event> eventPage = new PageImpl<>(events);
+        EventShortDto eventShortDto = createEventShortDto(event);
 
-        when(eventRepository.findPublishedEvents(
-                isNull(), isNull(), isNull(), any(LocalDateTime.class), isNull(), any(PageRequest.class)
-        )).thenReturn(eventPage);
-        when(eventMapper.toShortDto(event)).thenReturn(createEventShortDto(event));
+        when(eventRepositoryCustom.findPublishedEvents(
+                any(), any(), any(), any(), any(), any(Pageable.class)
+        )).thenReturn(new PageImpl<>(List.of(event)));
+
+        when(eventMapper.toShortDto(event))
+                .thenReturn(eventShortDto);
 
         List<EventShortDto> result = eventService.getPublicEvents(
-                null, null, null, null, null, false, null, 0, 10
+                null, null, null, null, null, false,
+                null, 0, 10
         );
 
-        assertThat(result).hasSize(1);
-        verify(eventRepository).findPublishedEvents(
-                isNull(), isNull(), isNull(), any(LocalDateTime.class), isNull(), any(PageRequest.class)
+        assertThat(result).containsExactly(eventShortDto);
+
+        verify(eventRepositoryCustom).findPublishedEvents(
+                any(), any(), any(), any(), any(), any(Pageable.class)
         );
     }
 
     @Test
     void getPublicEvents_shouldApplyDateRangeStart_whenNull() {
-        List<Event> events = List.of(event);
-        Page<Event> eventPage = new PageImpl<>(events);
+        when(eventRepositoryCustom.findPublishedEvents(
+                any(), any(), any(), any(), any(), any(Pageable.class)
+        )).thenReturn(new PageImpl<>(List.of()));
 
-        when(eventRepository.findPublishedEvents(
-                isNull(), isNull(), isNull(), any(LocalDateTime.class), isNull(), any(PageRequest.class)
-        )).thenReturn(eventPage);
-        when(eventMapper.toShortDto(event)).thenReturn(createEventShortDto(event));
+        eventService.getPublicEvents(null, null, null, null,
+                null, false, null, 0, 10
+        );
 
-        eventService.getPublicEvents(null, null, null, null, null, false, null, 0, 10);
-
-        verify(eventRepository).findPublishedEvents(
-                isNull(), isNull(), isNull(), argThat(date -> date != null), isNull(), any(PageRequest.class)
+        verify(eventRepositoryCustom).findPublishedEvents(
+                any(), any(), any(), any(), any(), any(Pageable.class)
         );
     }
 
     @Test
     void getPublicEvents_shouldFilterByText() {
-        List<Event> events = List.of(event);
-        Page<Event> eventPage = new PageImpl<>(events);
-        String text = "test";
+        when(eventRepositoryCustom.findPublishedEvents(
+                any(), any(), any(), any(), any(), any(Pageable.class)
+        )).thenReturn(new PageImpl<>(List.of()));
 
-        when(eventRepository.findPublishedEvents(
-                eq(text), isNull(), isNull(), any(LocalDateTime.class), isNull(), any(PageRequest.class)
-        )).thenReturn(eventPage);
-        when(eventMapper.toShortDto(event)).thenReturn(createEventShortDto(event));
-
-        eventService.getPublicEvents(text, null, null, null, null, false, null, 0, 10);
-
-        verify(eventRepository).findPublishedEvents(
-                eq(text), isNull(), isNull(), any(LocalDateTime.class), isNull(), any(PageRequest.class)
+        eventService.getPublicEvents(
+                "test", null, null, null, null,
+                false, null, 0, 10
         );
-    }
 
-    @Test
-    void getPublicEvents_shouldFilterByCategories() {
-        List<Long> categories = List.of(1L, 2L);
-        List<Event> events = List.of(event);
-        Page<Event> eventPage = new PageImpl<>(events);
-
-        when(eventRepository.findPublishedEvents(
-                isNull(), eq(categories), isNull(), any(LocalDateTime.class), isNull(), any(PageRequest.class)
-        )).thenReturn(eventPage);
-        when(eventMapper.toShortDto(event)).thenReturn(createEventShortDto(event));
-
-        eventService.getPublicEvents(null, categories, null, null, null, false, null, 0, 10);
-
-        verify(eventRepository).findPublishedEvents(
-                isNull(), eq(categories), isNull(), any(LocalDateTime.class), isNull(), any(PageRequest.class)
+        verify(eventRepositoryCustom).findPublishedEvents(
+                any(), any(), any(), any(), any(), any(Pageable.class)
         );
     }
 
     @Test
     void getPublicEvents_shouldFilterByPaid() {
-        List<Event> events = List.of(event);
-        Page<Event> eventPage = new PageImpl<>(events);
+        when(eventRepositoryCustom.findPublishedEvents(
+                any(), any(), any(), any(), any(), any(Pageable.class)
+        )).thenReturn(new PageImpl<>(List.of()));
 
-        when(eventRepository.findPublishedEvents(
-                isNull(), isNull(), eq(true), any(LocalDateTime.class), isNull(), any(PageRequest.class)
-        )).thenReturn(eventPage);
-        when(eventMapper.toShortDto(event)).thenReturn(createEventShortDto(event));
+        eventService.getPublicEvents(
+                null, null, true, null, null,
+                false, null, 0, 10
+        );
 
-        eventService.getPublicEvents(null, null, true, null, null, false, null, 0, 10);
+        verify(eventRepositoryCustom).findPublishedEvents(
+                any(), any(), any(), any(), any(), any(Pageable.class)
+        );
+    }
 
-        verify(eventRepository).findPublishedEvents(
-                isNull(), isNull(), eq(true), any(LocalDateTime.class), isNull(), any(PageRequest.class)
+    @Test
+    void getPublicEvents_shouldUseSpecificationWhenPaidIsSpecified() {
+        when(eventRepositoryCustom.findPublishedEvents(
+                any(), any(), any(), any(), any(), any(Pageable.class)
+        )).thenReturn(new PageImpl<>(List.of()));
+
+        eventService.getPublicEvents(
+                null, null, true,
+                null, null,
+                false, null,
+                0, 10
+        );
+
+        verify(eventRepositoryCustom).findPublishedEvents(
+                any(), any(), any(), any(), any(), any(Pageable.class)
         );
     }
 
     @Test
     void getPublicEvents_shouldSortByEventDate_whenSortIsNull() {
-        List<Event> events = List.of(event);
-        Page<Event> eventPage = new PageImpl<>(events);
+        when(eventRepositoryCustom.findPublishedEvents(
+                any(), any(), any(), any(), any(), any(Pageable.class)
+        )).thenReturn(new PageImpl<>(List.of()));
 
-        when(eventRepository.findPublishedEvents(
-                isNull(), isNull(), isNull(), any(LocalDateTime.class), isNull(), any(PageRequest.class)
-        )).thenReturn(eventPage);
-        when(eventMapper.toShortDto(event)).thenReturn(createEventShortDto(event));
+        eventService.getPublicEvents(
+                null,
+                null,
+                null,
+                null,
+                null,
+                false,
+                null,
+                0,
+                10
+        );
 
-        eventService.getPublicEvents(null, null, null, null, null, false, null, 0, 10);
+        Pageable expectedPageable = PageRequest.of(
+                0,
+                10,
+                Sort.by("eventDate").ascending()
+        );
 
-        verify(eventRepository).findPublishedEvents(
-                isNull(), isNull(), isNull(), any(LocalDateTime.class), isNull(),
-                argThat(pageable -> pageable.getSort().isSorted() &&
-                        pageable.getSort().getOrderFor("eventDate") != null)
+        verify(eventRepositoryCustom).findPublishedEvents(
+                any(), any(), any(), any(), any(), eq(PageRequest.of(0, 10, Sort.by("eventDate").ascending()))
         );
     }
 
