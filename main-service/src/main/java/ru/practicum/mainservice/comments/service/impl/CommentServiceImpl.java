@@ -82,7 +82,7 @@ public class CommentServiceImpl implements CommentService {
             );
         }
 
-        if (comment.getIsDeleted()) {
+        if (comment.getDeleted()) {
             throw new ConflictException(
                     "Удалённый комментарий нельзя редактировать"
             );
@@ -118,8 +118,8 @@ public class CommentServiceImpl implements CommentService {
             );
         }
 
-        if (!comment.getIsDeleted()) {
-            comment.setIsDeleted(true);
+        if (!comment.getDeleted()) {
+            comment.setDeleted(true);
             comment.setUpdatedAt(LocalDateTime.now());
             commentRepository.save(comment);
         }
@@ -149,7 +149,7 @@ public class CommentServiceImpl implements CommentService {
 
         return commentMapper.toDtoList(
                 commentRepository
-                        .findAllByEventIdAndIsDeletedFalse(eventId, pageable)
+                        .findByEventIdAndDeletedFalse(eventId, pageable)
                         .getContent()
         );
     }
@@ -157,7 +157,7 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public CommentDto getComment(Long eventId, Long commentId) {
         Comment comment = commentRepository
-                .findByIdAndIsDeletedFalse(commentId)
+                .findByIdAndDeletedFalse(commentId)
                 .orElseThrow(() -> new NotFoundException(
                         "Комментарий с id=" + commentId + " не найден"
                 ));
