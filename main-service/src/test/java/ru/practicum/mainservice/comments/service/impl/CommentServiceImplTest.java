@@ -92,7 +92,7 @@ class CommentServiceImplTest {
                 .event(publishedEvent)
                 .author(author)
                 .createdAt(LocalDateTime.now().minusHours(1))
-                .isDeleted(false)
+                .deleted(false)
                 .build();
 
         commentDto = CommentDto.builder()
@@ -122,7 +122,7 @@ class CommentServiceImplTest {
                     .text(newCommentDto.getText())
                     .event(publishedEvent)
                     .author(author)
-                    .isDeleted(false)
+                    .deleted(false)
                     .build();
 
             Comment savedComment = Comment.builder()
@@ -131,7 +131,7 @@ class CommentServiceImplTest {
                     .event(publishedEvent)
                     .author(author)
                     .createdAt(LocalDateTime.now())
-                    .isDeleted(false)
+                    .deleted(false)
                     .build();
 
             CommentDto savedDto = CommentDto.builder()
@@ -280,7 +280,7 @@ class CommentServiceImplTest {
 
         @Test
         void updateComment_shouldThrowConflict_whenCommentIsDeleted() {
-            comment.setIsDeleted(true);
+            comment.setDeleted(true);
             when(userRepository.existsById(USER_ID)).thenReturn(true);
             when(commentRepository.findById(COMMENT_ID)).thenReturn(Optional.of(comment));
 
@@ -305,7 +305,7 @@ class CommentServiceImplTest {
 
             LocalDateTime afterDelete = LocalDateTime.now();
 
-            assertThat(comment.getIsDeleted()).isTrue();
+            assertThat(comment.getDeleted()).isTrue();
             assertThat(comment.getUpdatedAt())
                     .isNotNull()
                     .isBetween(beforeDelete, afterDelete);
@@ -315,13 +315,13 @@ class CommentServiceImplTest {
 
         @Test
         void deleteCommentByUser_shouldDoNothing_whenCommentAlreadyDeleted() {
-            comment.setIsDeleted(true);
+            comment.setDeleted(true);
             when(userRepository.existsById(USER_ID)).thenReturn(true);
             when(commentRepository.findById(COMMENT_ID)).thenReturn(Optional.of(comment));
 
             commentService.deleteCommentByUser(USER_ID, COMMENT_ID);
 
-            assertThat(comment.getIsDeleted()).isTrue();
+            assertThat(comment.getDeleted()).isTrue();
             verify(commentRepository, never()).save(any(Comment.class));
             verify(commentRepository, never()).delete(any(Comment.class));
         }
@@ -380,14 +380,14 @@ class CommentServiceImplTest {
             List<CommentDto> expected = List.of(commentDto);
 
             when(eventRepository.findById(EVENT_ID)).thenReturn(Optional.of(publishedEvent));
-            when(commentRepository.findAllByEventIdAndIsDeletedFalse(EVENT_ID, pageable))
+            when(commentRepository.findByEventIdAndDeletedFalse(EVENT_ID, pageable))
                     .thenReturn(new PageImpl<>(comments, pageable, comments.size()));
             when(commentMapper.toDtoList(comments)).thenReturn(expected);
 
             List<CommentDto> result = commentService.getEventComments(EVENT_ID, from, size, null);
 
             assertThat(result).containsExactlyElementsOf(expected);
-            verify(commentRepository).findAllByEventIdAndIsDeletedFalse(EVENT_ID, pageable);
+            verify(commentRepository).findByEventIdAndDeletedFalse(EVENT_ID, pageable);
             verify(commentMapper).toDtoList(comments);
         }
 
@@ -399,7 +399,7 @@ class CommentServiceImplTest {
             List<Comment> comments = List.of(comment);
 
             when(eventRepository.findById(EVENT_ID)).thenReturn(Optional.of(publishedEvent));
-            when(commentRepository.findAllByEventIdAndIsDeletedFalse(EVENT_ID, pageable))
+            when(commentRepository.findByEventIdAndDeletedFalse(EVENT_ID, pageable))
                     .thenReturn(new PageImpl<>(comments, pageable, comments.size()));
             when(commentMapper.toDtoList(comments)).thenReturn(List.of(commentDto));
 
@@ -412,7 +412,7 @@ class CommentServiceImplTest {
 
             assertThat(result).containsExactly(commentDto);
             assertThat(pageable.getSort().isUnsorted()).isTrue();
-            verify(commentRepository).findAllByEventIdAndIsDeletedFalse(EVENT_ID, pageable);
+            verify(commentRepository).findByEventIdAndDeletedFalse(EVENT_ID, pageable);
         }
 
         @Test
@@ -443,7 +443,7 @@ class CommentServiceImplTest {
 
         @Test
         void getComment_shouldReturnActiveCommentOfPublishedEvent() {
-            when(commentRepository.findByIdAndIsDeletedFalse(COMMENT_ID))
+            when(commentRepository.findByIdAndDeletedFalse(COMMENT_ID))
                     .thenReturn(Optional.of(comment));
             when(commentMapper.toDto(comment)).thenReturn(commentDto);
 
@@ -455,7 +455,7 @@ class CommentServiceImplTest {
 
         @Test
         void getComment_shouldThrowNotFound_whenCommentDoesNotExistOrDeleted() {
-            when(commentRepository.findByIdAndIsDeletedFalse(COMMENT_ID))
+            when(commentRepository.findByIdAndDeletedFalse(COMMENT_ID))
                     .thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> commentService.getComment(EVENT_ID, COMMENT_ID))
@@ -468,7 +468,7 @@ class CommentServiceImplTest {
         @Test
         void getComment_shouldThrowNotFound_whenCommentEventIsNotPublished() {
             comment.setEvent(pendingEvent);
-            when(commentRepository.findByIdAndIsDeletedFalse(COMMENT_ID))
+            when(commentRepository.findByIdAndDeletedFalse(COMMENT_ID))
                     .thenReturn(Optional.of(comment));
 
             assertThatThrownBy(() -> commentService.getComment(EVENT_ID, COMMENT_ID))
