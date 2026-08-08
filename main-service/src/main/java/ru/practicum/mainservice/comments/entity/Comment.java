@@ -111,5 +111,5 @@ public class Comment {
      */
     @Column(name = "is_deleted", nullable = false)
     @Builder.Default
-    private Boolean deleted = false;
+    private Boolean isDeleted = false;
 }
