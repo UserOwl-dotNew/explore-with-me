@@ -1114,7 +1114,7 @@
                   "pm.test(\"Данные комментария должен быть корректными\", function() {\r",
                   "    const comment = pm.response.json()[0];\r",
                   "    const expectedEventId = parseInt(pm.environment.get(\"eventId\"));\r",
-                  "    const expectedCommentId = parseInt(pm.environment.get(\"commentId\"))\r",
+                  "    const expectedCommentId = parseInt(pm.environment.get(\"commentId\"));\r",
                   "\r",
                   "    pm.expect(comment.id).to.equal(expectedCommentId);\r",
                   "    pm.expect(comment.text).to.equal(\"Прекрасное событие, я очень рад присоединиться к нему\");\r",
@@ -1346,6 +1346,294 @@
               "path": [
                 "events",
                 "{{eventId}}",
+                "comments",
+                "999"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Admin",
+      "item": [
+        {
+          "name": "16. DELETE /users/{userId}/comments/{commentId} - 404",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Статус 404\", function () {\r",
+                  "    pm.response.to.have.status(404);\r",
+                  "});\r",
+                  "pm.test(\"Сообщение об ошибке содержит 'Comment not found'\", function () {\r",
+                  "    pm.expect(pm.response.json().message).to.include(\"Comment not found\");\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/999/comments/999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "999",
+                "comments",
+                "999"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "17. GET /admin/comments/users/{userId} - успешно",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Статус 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "pm.test(\"Тело ответа - массив\", function () {\r",
+                  "    pm.expect(pm.response.json()).to.be.an('array');\r",
+                  "});\r",
+                  "pm.test(\"Комментарии содержат обязательные поля\", function () {\r",
+                  "    const comments = pm.response.json();\r",
+                  "    if (comments.length > 0) {\r",
+                  "        const comment = comments[0];\r",
+                  "        pm.expect(comment).to.have.property('id');\r",
+                  "        pm.expect(comment).to.have.property('text');\r",
+                  "        pm.expect(comment).to.have.property('author');\r",
+                  "        pm.expect(comment).to.have.property('event');\r",
+                  "        pm.expect(comment).to.have.property('created');\r",
+                  "    }\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/comments/users/{{userId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "comments",
+                "users",
+                "{{userId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "18. GET /admin/comments/users/{userId} - 404",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Статус 404\", function () {\r",
+                  "    pm.response.to.have.status(404);\r",
+                  "});\r",
+                  "pm.test(\"Сообщение об ошибке содержит 'User not found'\", function () {\r",
+                  "    pm.expect(pm.response.json().message).to.include(\"User not found\");\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/comments/users/999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "comments",
+                "users",
+                "999"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "19. GET /admin/comments/events/{eventId} - успешно",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Статус 200\", function () {\r",
+                  "    pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "pm.test(\"Тело ответа - массив\", function () {\r",
+                  "    pm.expect(pm.response.json()).to.be.an('array');\r",
+                  "});\r",
+                  "pm.test(\"Комментарии содержат обязательные поля\", function () {\r",
+                  "    const comments = pm.response.json();\r",
+                  "    if (comments.length > 0) {\r",
+                  "        const comment = comments[0];\r",
+                  "        pm.expect(comment).to.have.property('id');\r",
+                  "        pm.expect(comment).to.have.property('text');\r",
+                  "        pm.expect(comment).to.have.property('author');\r",
+                  "        pm.expect(comment).to.have.property('event');\r",
+                  "        pm.expect(comment).to.have.property('created');\r",
+                  "    }\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/comments/events/{{eventId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "comments",
+                "events",
+                "{{eventId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "20. GET /admin/comments/events/{eventId} - 404",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Статус 404\", function () {\r",
+                  "    pm.response.to.have.status(404);\r",
+                  "});\r",
+                  "pm.test(\"Сообщение об ошибке содержит 'Event not found'\", function () {\r",
+                  "    pm.expect(pm.response.json().message).to.include(\"Event not found\");\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/comments/events/999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "comments",
+                "events",
+                "999"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "21. DELETE /admin/comments/{commentId} - успешно",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Статус 204\", function () {\r",
+                  "    pm.response.to.have.status(204);\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/comments/{{commentId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
+                "comments",
+                "{{commentId}}"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "22. DELETE /admin/comments/{commentId} - 404",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Статус 404\", function () {\r",
+                  "    pm.response.to.have.status(404);\r",
+                  "});\r",
+                  "pm.test(\"Сообщение об ошибке содержит 'Comment not found'\", function () {\r",
+                  "    pm.expect(pm.response.json().message).to.include(\"Comment not found\");\r",
+                  "});"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/admin/comments/999",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "admin",
                 "comments",
                 "999"
               ]
