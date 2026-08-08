@@ -6,10 +6,6 @@ import ru.practicum.common.entity.Category;
 
 import java.util.Optional;
 
-/**
- * Репозиторий для работы с категориями событий.
- * Предоставляет методы для поиска категорий по имени.
- */
 public interface CategoryRepository extends JpaRepository<Category, Long> {
 
     /**
@@ -19,4 +15,5 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
      * @return Optional с категорией, если найдена
      */
     Optional<Category> findByName(@Size(max = 50) String name);
+
 }
