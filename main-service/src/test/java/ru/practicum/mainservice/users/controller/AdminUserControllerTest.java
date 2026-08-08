@@ -12,6 +12,7 @@ import ru.practicum.common.dto.UserDto;
 import ru.practicum.mainservice.controller.user.AdminUserController;
 import ru.practicum.mainservice.users.dto.NewUserRequest;
 import ru.practicum.mainservice.users.service.UserService;
+import ru.practicum.statistics.client.controller.StatsClient;
 
 import java.util.List;
 
@@ -32,6 +33,9 @@ class AdminUserControllerTest {
 
     @MockBean
     private UserService userService;
+
+    @MockBean
+    private StatsClient statsClient;
 
     @Test
     void getUsers_shouldReturnUsers() throws Exception {

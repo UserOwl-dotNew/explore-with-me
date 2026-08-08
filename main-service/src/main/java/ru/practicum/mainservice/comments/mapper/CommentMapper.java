@@ -55,7 +55,7 @@ public interface CommentMapper {
             expression = "java(java.time.LocalDateTime.now())"
     )
     @Mapping(target = "updatedAt", ignore = true)
-    @Mapping(target = "isDeleted", constant = "false")
+    @Mapping(target = "deleted", constant = "false")
     Comment toEntity(
             NewCommentDto dto,
             Event event,
@@ -78,7 +78,7 @@ public interface CommentMapper {
     @Mapping(target = "author", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
-    @Mapping(target = "isDeleted", ignore = true)
+    @Mapping(target = "deleted", ignore = true)
     void update(
             UpdateCommentDto dto,
             @MappingTarget Comment comment
