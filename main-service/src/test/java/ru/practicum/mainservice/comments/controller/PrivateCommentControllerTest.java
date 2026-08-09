@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
@@ -15,7 +14,6 @@ import ru.practicum.common.dto.NewCommentDto;
 import ru.practicum.common.dto.UpdateCommentDto;
 import ru.practicum.common.dto.UserShortDto;
 import ru.practicum.mainservice.comments.service.CommentService;
-import ru.practicum.mainservice.controller.comment.PrivateCommentController;
 
 import java.time.LocalDateTime;
 

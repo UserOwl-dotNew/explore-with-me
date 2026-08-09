@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
@@ -14,7 +13,6 @@ import ru.practicum.common.dto.CompilationDto;
 import ru.practicum.mainservice.compilations.dto.NewCompilationDto;
 import ru.practicum.mainservice.compilations.dto.UpdateCompilationRequest;
 import ru.practicum.mainservice.compilations.service.CompilationService;
-import ru.practicum.mainservice.controller.compilation.AdminCompilationController;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
