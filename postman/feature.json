@@ -1,11 +1,11 @@
 {
   "info": {
-    "_postman_id": "d8e6e604-e83b-461a-893c-776d19fc1afa",
+    "_postman_id": "d190ccdf-be82-44ee-a2e8-4445abd2a908",
     "name": "Comments Feature Tests Copy",
     "description": "# Тесты для функциональности комментариев",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "51191683",
-    "_collection_link": "https://go.postman.co/collection/51191683-d8e6e604-e83b-461a-893c-776d19fc1afa?source=collection_link"
+    "_collection_link": "https://go.postman.co/collection/51191683-d190ccdf-be82-44ee-a2e8-4445abd2a908?source=collection_link"
   },
   "item": [
     {
@@ -1368,8 +1368,8 @@
                   "pm.test(\"Статус 404\", function () {\r",
                   "    pm.response.to.have.status(404);\r",
                   "});\r",
-                  "pm.test(\"Сообщение об ошибке содержит 'Comment not found'\", function () {\r",
-                  "    pm.expect(pm.response.json().message).to.include(\"Comment not found\");\r",
+                  "pm.test(\"Сообщение об ошибке содержит 'Пользователь с id=999 не найден'\", function () {\r",
+                  "    pm.expect(pm.response.json().message).to.include(\"Пользователь с id=999 не найден\");\r",
                   "});"
                 ],
                 "type": "text/javascript",
@@ -1416,8 +1416,8 @@
                   "        pm.expect(comment).to.have.property('id');\r",
                   "        pm.expect(comment).to.have.property('text');\r",
                   "        pm.expect(comment).to.have.property('author');\r",
-                  "        pm.expect(comment).to.have.property('event');\r",
-                  "        pm.expect(comment).to.have.property('created');\r",
+                  "        pm.expect(comment).to.have.property('eventId');\r",
+                  "        pm.expect(comment).to.have.property('createdAt');\r",
                   "    }\r",
                   "});"
                 ],
@@ -1455,8 +1455,8 @@
                   "pm.test(\"Статус 404\", function () {\r",
                   "    pm.response.to.have.status(404);\r",
                   "});\r",
-                  "pm.test(\"Сообщение об ошибке содержит 'User not found'\", function () {\r",
-                  "    pm.expect(pm.response.json().message).to.include(\"User not found\");\r",
+                  "pm.test(\"Сообщение об ошибке содержит 'Пользователь с id=999 не найден'\", function () {\r",
+                  "    pm.expect(pm.response.json().message).to.include(\"Пользователь с id=999 не найден\");\r",
                   "});"
                 ],
                 "type": "text/javascript",
@@ -1503,8 +1503,8 @@
                   "        pm.expect(comment).to.have.property('id');\r",
                   "        pm.expect(comment).to.have.property('text');\r",
                   "        pm.expect(comment).to.have.property('author');\r",
-                  "        pm.expect(comment).to.have.property('event');\r",
-                  "        pm.expect(comment).to.have.property('created');\r",
+                  "        pm.expect(comment).to.have.property('eventId');\r",
+                  "        pm.expect(comment).to.have.property('createdAt');\r",
                   "    }\r",
                   "});"
                 ],
@@ -1543,7 +1543,7 @@
                   "    pm.response.to.have.status(404);\r",
                   "});\r",
                   "pm.test(\"Сообщение об ошибке содержит 'Event not found'\", function () {\r",
-                  "    pm.expect(pm.response.json().message).to.include(\"Event not found\");\r",
+                  "    pm.expect(pm.response.json().message).to.include(\"Событие с id=999 не найдено\");\r",
                   "});"
                 ],
                 "type": "text/javascript",
@@ -1614,8 +1614,8 @@
                   "pm.test(\"Статус 404\", function () {\r",
                   "    pm.response.to.have.status(404);\r",
                   "});\r",
-                  "pm.test(\"Сообщение об ошибке содержит 'Comment not found'\", function () {\r",
-                  "    pm.expect(pm.response.json().message).to.include(\"Comment not found\");\r",
+                  "pm.test(\"Сообщение об ошибке содержит 'Комментарий с id=999 не найден'\", function () {\r",
+                  "    pm.expect(pm.response.json().message).to.include(\"Комментарий с id=999 не найден\");\r",
                   "});"
                 ],
                 "type": "text/javascript",

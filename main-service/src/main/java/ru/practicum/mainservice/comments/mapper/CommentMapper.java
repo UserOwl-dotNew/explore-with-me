@@ -31,6 +31,7 @@ public interface CommentMapper {
      * @return DTO с информацией о комментарии
      */
     @Mapping(target = "eventId", source = "event.id")
+    @Mapping(target = "isDeleted", source = "deleted")
     CommentDto toDto(Comment comment);
 
     /**
