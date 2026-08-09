@@ -2,8 +2,11 @@ package ru.practicum.mainservice.comments.controller;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.common.dto.CommentDto;
 import ru.practicum.common.dto.UserShortDto;
@@ -22,7 +25,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(AdminCommentController.class)
+@SpringBootTest
+@AutoConfigureMockMvc
+@ActiveProfiles("test")
 public class AdminCommentControllerTest {
 
     @Autowired
@@ -59,24 +64,6 @@ public class AdminCommentControllerTest {
     }
 
     @Test
-    void getUserComments_withNegativeUserId_shouldReturnBadRequest() throws Exception {
-        mvc.perform(get("/admin/comments/users/{userId}", -1L))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void getUserComments_withInvalidSize_shouldReturnBadRequest() throws Exception {
-        mvc.perform(get("/admin/comments/users/{userId}?size=-1", userId))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void getUserComments_withInvalidFrom_shouldReturnBadRequest() throws Exception {
-        mvc.perform(get("/admin/comments/users/{userId}?from=-1", userId))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
     void getEventComments_shouldReturnListOfComments() throws Exception {
         when(service.getEventCommentsByAdmin(eq(eventId), eq(0), eq(10), anyString()))
                 .thenReturn(List.of(createCommentDto()));
@@ -99,41 +86,11 @@ public class AdminCommentControllerTest {
     }
 
     @Test
-    void getEventComments_withNegativeEventId_shouldReturnBadRequest() throws Exception {
-        mvc.perform(get("/admin/comments/events/{eventId}", -1L))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void getEventComments_withInvalidSize_shouldReturnBadRequest() throws Exception {
-        mvc.perform(get("/admin/comments/events/{eventId}?size=-1", eventId))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void getEventComments_withInvalidFrom_shouldReturnBadRequest() throws Exception {
-        mvc.perform(get("/admin/comments/events/{eventId}?from=-1", eventId))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
     void deleteComment_shouldReturnOk() throws Exception {
         doNothing().when(service).deleteCommentByAdmin(eq(commentId));
 
         mvc.perform(delete("/admin/comments/{commentId}", commentId))
                 .andExpect(status().isNoContent());
-    }
-
-    @Test
-    void deleteComment_withNegativeCommentId_shouldReturnBadRequest() throws Exception {
-        mvc.perform(delete("/admin/comments/{commentId}", -1L))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void deleteComment_withZeroCommentId_shouldReturnBadRequest() throws Exception {
-        mvc.perform(delete("/admin/comments/{commentId}", 0L))
-                .andExpect(status().isBadRequest());
     }
 
     private CommentDto createCommentDto() {

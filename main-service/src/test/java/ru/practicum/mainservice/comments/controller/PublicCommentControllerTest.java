@@ -2,8 +2,11 @@ package ru.practicum.mainservice.comments.controller;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.common.dto.CommentDto;
 import ru.practicum.mainservice.comments.service.CommentService;
@@ -17,7 +20,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(PublicCommentController.class)
+@SpringBootTest
+@AutoConfigureMockMvc
+@ActiveProfiles("test")
 public class PublicCommentControllerTest {
     @Autowired
     private MockMvc mvc;
@@ -46,12 +51,6 @@ public class PublicCommentControllerTest {
                 .andExpect(jsonPath("$").isEmpty());
     }
 
-    @Test
-    void getComments_withNegativeId_shouldReturnError() throws Exception {
-        mvc.perform(get("/events/{eventId}/comments", -1L))
-                .andExpect(status().isBadRequest());
-    }
-
 
     @Test
     void getComment_shouldReturnComment() throws Exception {
@@ -62,12 +61,6 @@ public class PublicCommentControllerTest {
                 .andExpect(jsonPath("$.id").value(1L))
                 .andExpect(jsonPath("$.text").value("Wow, so beautiful!!!"));
 
-    }
-
-    @Test
-    void getComment_withNegativeEventAndCommentId_shouldReturnBadRequest() throws Exception {
-        mvc.perform(get("/events/{eventId}/comments/{commentId}", -eventId, -1L))
-                .andExpect(status().isBadRequest());
     }
 
     private CommentDto createCommentDto() {

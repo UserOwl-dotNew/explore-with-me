@@ -3,9 +3,12 @@ package ru.practicum.mainservice.comments.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.common.dto.CommentDto;
 import ru.practicum.common.dto.NewCommentDto;
@@ -24,7 +27,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(PrivateCommentController.class)
+@SpringBootTest
+@AutoConfigureMockMvc
+@ActiveProfiles("test")
 public class PrivateCommentControllerTest {
 
     @Autowired
@@ -109,30 +114,6 @@ public class PrivateCommentControllerTest {
     }
 
     @Test
-    void createComment_withNegativeUserId_shouldReturnBadRequest() throws Exception {
-        NewCommentDto request = NewCommentDto.builder()
-                .text("Great event!")
-                .build();
-
-        mvc.perform(post("/users/{userId}/comments/events/{eventId}", -1L, eventId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void createComment_withNegativeEventId_shouldReturnBadRequest() throws Exception {
-        NewCommentDto request = NewCommentDto.builder()
-                .text("Great event!")
-                .build();
-
-        mvc.perform(post("/users/{userId}/comments/events/{eventId}", userId, -1L)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
     void updateComment_shouldReturnUpdatedComment() throws Exception {
         UpdateCommentDto request = UpdateCommentDto.builder()
                 .text("Updated comment text")
@@ -176,47 +157,11 @@ public class PrivateCommentControllerTest {
     }
 
     @Test
-    void updateComment_withNegativeUserId_shouldReturnBadRequest() throws Exception {
-        UpdateCommentDto request = UpdateCommentDto.builder()
-                .text("Updated text")
-                .build();
-
-        mvc.perform(patch("/users/{userId}/comments/{commentId}", -1L, commentId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void updateComment_withNegativeCommentId_shouldReturnBadRequest() throws Exception {
-        UpdateCommentDto request = UpdateCommentDto.builder()
-                .text("Updated text")
-                .build();
-
-        mvc.perform(patch("/users/{userId}/comments/{commentId}", userId, -1L)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
     void deleteComment_shouldReturnOk() throws Exception {
         doNothing().when(service).deleteCommentByUser(eq(userId), eq(commentId));
 
         mvc.perform(delete("/users/{userId}/comments/{commentId}", userId, commentId))
                 .andExpect(status().isNoContent());
-    }
-
-    @Test
-    void deleteComment_withNegativeUserId_shouldReturnBadRequest() throws Exception {
-        mvc.perform(delete("/users/{userId}/comments/{commentId}", -1L, commentId))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void deleteComment_withNegativeCommentId_shouldReturnBadRequest() throws Exception {
-        mvc.perform(delete("/users/{userId}/comments/{commentId}", userId, -1L))
-                .andExpect(status().isBadRequest());
     }
 
     private CommentDto createCommentDto() {

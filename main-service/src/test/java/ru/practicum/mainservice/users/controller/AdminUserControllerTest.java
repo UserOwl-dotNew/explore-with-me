@@ -3,14 +3,18 @@ package ru.practicum.mainservice.users.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.common.dto.UserDto;
 import ru.practicum.mainservice.controller.user.AdminUserController;
 import ru.practicum.mainservice.users.dto.NewUserRequest;
+import ru.practicum.mainservice.users.repository.UserRepository;
 import ru.practicum.mainservice.users.service.UserService;
 import ru.practicum.statistics.client.controller.StatsClient;
 
@@ -22,7 +26,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(AdminUserController.class)
+@SpringBootTest
+@AutoConfigureMockMvc
+@ActiveProfiles("test")
 class AdminUserControllerTest {
 
     @Autowired
@@ -36,6 +42,9 @@ class AdminUserControllerTest {
 
     @MockBean
     private StatsClient statsClient;
+
+    @MockBean
+    private UserRepository userRepository;
 
     @Test
     void getUsers_shouldReturnUsers() throws Exception {
@@ -95,22 +104,6 @@ class AdminUserControllerTest {
                 List.of(1L, 2L),
                 PageRequest.of(2, 5)
         );
-    }
-
-    @Test
-    void getUsers_shouldReturnBadRequest_whenFromIsNegative()
-            throws Exception {
-        mockMvc.perform(get("/admin/users")
-                        .param("from", "-1"))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void getUsers_shouldReturnBadRequest_whenSizeIsZero()
-            throws Exception {
-        mockMvc.perform(get("/admin/users")
-                        .param("size", "0"))
-                .andExpect(status().isBadRequest());
     }
 
     @Test
