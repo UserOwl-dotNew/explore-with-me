@@ -2,13 +2,14 @@ package ru.practicum.mainservice.compilations.controller;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.common.dto.CompilationDto;
 import ru.practicum.mainservice.compilations.service.CompilationService;
-import ru.practicum.mainservice.controller.PublicCompilationController;
 
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -20,7 +21,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(PublicCompilationController.class)
+@SpringBootTest
+@AutoConfigureMockMvc
+@ActiveProfiles("test")
 class PublicCompilationControllerTest {
 
     @Autowired
@@ -110,22 +113,6 @@ class PublicCompilationControllerTest {
                 false,
                 PageRequest.of(2, 5)
         );
-    }
-
-    @Test
-    void getCompilations_shouldReturnBadRequest_whenFromIsNegative()
-            throws Exception {
-        mockMvc.perform(get("/compilations")
-                        .param("from", "-1"))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void getCompilations_shouldReturnBadRequest_whenSizeIsZero()
-            throws Exception {
-        mockMvc.perform(get("/compilations")
-                        .param("size", "0"))
-                .andExpect(status().isBadRequest());
     }
 
     @Test

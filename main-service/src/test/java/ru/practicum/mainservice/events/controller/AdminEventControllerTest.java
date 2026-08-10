@@ -4,12 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
-import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.practicum.common.dto.CategoryDto;
 import ru.practicum.common.dto.LocationDto;
@@ -19,7 +18,6 @@ import ru.practicum.common.entity.Location;
 import ru.practicum.common.entity.User;
 import ru.practicum.common.enums.AdminStateAction;
 import ru.practicum.common.enums.EventState;
-import ru.practicum.mainservice.controller.AdminEventController;
 import ru.practicum.mainservice.events.dto.EventFullDto;
 import ru.practicum.mainservice.events.dto.UpdateEventAdminRequest;
 import ru.practicum.mainservice.events.service.EventService;
@@ -34,14 +32,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(
-        controllers = AdminEventController.class,
-        excludeAutoConfiguration = {
-                DataSourceAutoConfiguration.class,
-                HibernateJpaAutoConfiguration.class,
-                JpaRepositoriesAutoConfiguration.class
-        }
-)
+@SpringBootTest
+@AutoConfigureMockMvc
+@ActiveProfiles("test")
 public class AdminEventControllerTest {
 
     @Autowired
